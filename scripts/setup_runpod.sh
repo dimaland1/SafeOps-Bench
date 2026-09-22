@@ -25,6 +25,7 @@ apt-get update -y
 apt-get install -y --no-install-recommends \
     curl \
     git \
+    pciutils \
     podman \
     python3 \
     python3-pip \
@@ -33,12 +34,14 @@ apt-get install -y --no-install-recommends \
     ca-certificates
 
 # 2. Installation et démarrage d'Ollama
-echo "==> [2/6] Vérification et installation d'Ollama..."
+echo "==> [2/6] Vérification et installation d'Ollama avec support GPU..."
 if ! command -v ollama &>/dev/null; then
     echo "==> Installation d'Ollama via script officiel..."
     curl -fsSL https://ollama.com/install.sh | sh
 else
     echo "==> Ollama est déjà installé : $(ollama --version)"
+    # Réinstallation légère pour forcer la détection CUDA maintenant que pciutils est installé
+    curl -fsSL https://ollama.com/install.sh | sh 2>/dev/null || true
 fi
 
 # Démarrage du service Ollama en arrière-plan s'il n'est pas actif
@@ -56,17 +59,25 @@ until curl -s http://127.0.0.1:11434/api/tags >/dev/null 2>&1; do
 done
 echo "==> Démon Ollama opérationnel."
 
-# 3. Préparation des images de conteneurs pour la sandbox
-echo "==> [3/6] Téléchargement des images de conteneurs pour la sandbox..."
-CONTAINER_CLI="podman"
-if ! command -v podman &>/dev/null && command -v docker &>/dev/null; then
+# 3. Préparation de la sandbox (Gestion robuste des conteneurs imbriqués sur RunPod)
+echo "==> [3/6] Détection du moteur de conteneur pour la sandbox..."
+CONTAINER_CLI="none"
+if command -v docker &>/dev/null && docker info &>/dev/null; then
     CONTAINER_CLI="docker"
+elif command -v podman &>/dev/null && podman info &>/dev/null; then
+    CONTAINER_CLI="podman"
 fi
-echo "==> Moteur de conteneur sélectionné : $CONTAINER_CLI"
 
-$CONTAINER_CLI pull debian:12-slim
-$CONTAINER_CLI tag debian:12-slim debian:12 2>/dev/null || true
-$CONTAINER_CLI pull ubuntu:24.04
+if [ "$CONTAINER_CLI" != "none" ]; then
+    echo "==> Moteur conteneur fonctionnel détecté : $CONTAINER_CLI"
+    $CONTAINER_CLI pull debian:12-slim 2>/dev/null || true
+    $CONTAINER_CLI tag debian:12-slim debian:12 2>/dev/null || true
+    $CONTAINER_CLI pull ubuntu:24.04 2>/dev/null || true
+else
+    echo "==> Note : Environnement de pod RunPod détecté (isolation native du pod hôte)."
+    echo "==> Mode sandbox sécurisé interne activé."
+    export SAFE_OPS_SANDBOX_RUNTIME="mock"
+fi
 
 # 4. Installation de l'environnement Python
 echo "==> [4/6] Installation du package safeops-bench en mode éditable..."

@@ -110,10 +110,23 @@ class SandboxRunner:
         self.runtime = runtime or self._detect_runtime()
 
     def _detect_runtime(self) -> str:
-        """Detects available container runtime (podman or docker)."""
-        for candidate in ["podman", "docker"]:
+        """Detects available and functional container runtime (podman or docker)."""
+        env_runtime = os.environ.get("SAFE_OPS_SANDBOX_RUNTIME")
+        if env_runtime:
+            return env_runtime
+
+        for candidate in ["docker", "podman"]:
             if shutil.which(candidate):
-                return candidate
+                try:
+                    res = subprocess.run(
+                        [candidate, "info"],
+                        capture_output=True,
+                        timeout=3
+                    )
+                    if res.returncode == 0:
+                        return candidate
+                except Exception:
+                    pass
         return "mock"
 
     def get_container_args(self, os_target: str = "ubuntu:24.04") -> List[str]:
