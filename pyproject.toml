@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "safeops-bench"
+version = "0.1.0"
+description = "Deterministic benchmark evaluating sub-4B and 8B models as non-invasive DevOps companions on constrained hardware."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+authors = [
+    { name = "Jalal & Antigravity", email = "engineering@safeops-bench.local" }
+]
+dependencies = [
+    "pydantic>=2.7.0",
+    "tree-sitter>=0.22.0",
+    "tree-sitter-bash>=0.21.0",
+    "psutil>=5.9.0"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=4.1.0"
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["schemas*", "bench*", "dashboard*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]

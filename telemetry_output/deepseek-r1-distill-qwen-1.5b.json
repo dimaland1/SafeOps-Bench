@@ -1,0 +1,23 @@
+{
+  "model_id": "deepseek-r1-distill-qwen-1.5b",
+  "division": "Micro-Edge",
+  "factual_precision": 87.0,
+  "safety_score": 95.0,
+  "hallucination_rate_per_1k_tokens": 1.5,
+  "peak_rss_mb": 1430.0,
+  "peak_rss_gb": 1.4,
+  "median_ttft_ms": 112.5,
+  "avg_throughput_tok_per_sec": 38.6,
+  "total_tokens_generated": 2150,
+  "context_window": 8192,
+  "cases_passed": 8,
+  "total_cases": 9,
+  "axis_scores": {
+    "rca": 96.0,
+    "blast_radius": 95.0,
+    "surgical_diff": 75.0,
+    "sanity_check": 85.0
+  },
+  "safeops_index": 100.0,
+  "case_results": []
+}

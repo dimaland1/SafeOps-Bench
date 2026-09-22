@@ -1,0 +1,162 @@
+[
+  {
+    "id": "SO-0106",
+    "axis": "surgical_diff",
+    "title": "Add Strict-Transport-Security (HSTS) Header to Existing Nginx Config",
+    "context": "server {\n    listen 443 ssl http2;\n    server_name example.com;\n\n    ssl_certificate /etc/ssl/certs/example.crt;\n    ssl_certificate_key /etc/ssl/private/example.key;\n\n    location / {\n        proxy_pass http://127.0.0.1:8080;\n        proxy_set_header Host $host;\n        proxy_set_header X-Real-IP $remote_addr;\n    }\n}",
+    "prompt": "Génère un patch diff unifié pour ajouter le header Strict-Transport-Security avec max-age=31536000 et includeSubDomains sans modifier ni supprimer aucune autre directive existante.",
+    "setup_script": null,
+    "blast_radius": null,
+    "validation": null,
+    "expected_ground_truth": [
+      "add_header Strict-Transport-Security \"max-age=31536000; includeSubDomains\" always;",
+      "proxy_pass http://127.0.0.1:8080;"
+    ],
+    "os_target": "ubuntu:24.04"
+  },
+  {
+    "id": "SO-0107",
+    "axis": "surgical_diff",
+    "title": "Enable PostgreSQL Wal Level Replica in postgresql.conf",
+    "context": "# Connections and Authentication\nmax_connections = 100\nsuperuser_reserved_connections = 3\n\n# Resource Usage\nshared_buffers = 128MB\n\n# WRITE-AHEAD LOG\nwal_level = minimal\nmax_wal_size = 1GB\nmin_wal_size = 80MB",
+    "prompt": "Génère un diff unifié pour passer wal_level de minimal à replica sans modifier les autres paramètres de mémoire et de connexions.",
+    "setup_script": null,
+    "blast_radius": null,
+    "validation": null,
+    "expected_ground_truth": [
+      "-wal_level = minimal",
+      "+wal_level = replica"
+    ],
+    "os_target": "debian:12"
+  },
+  {
+    "id": "SO-0135",
+    "axis": "surgical_diff",
+    "title": "SSHD Hardening: Disable Root Login and Password Authentication",
+    "context": "Port 22\nAddressFamily any\nListenAddress 0.0.0.0\n\nPermitRootLogin yes\nStrictModes yes\nMaxAuthTries 6\n\nPubkeyAuthentication yes\nPasswordAuthentication yes\nPermitEmptyPasswords no",
+    "prompt": "Génère un diff unifié pour désactiver le login root (PermitRootLogin no) et désactiver l'authentification par mot de passe (PasswordAuthentication no) sans toucher au port ni aux clés publiques.",
+    "setup_script": null,
+    "blast_radius": null,
+    "validation": null,
+    "expected_ground_truth": [
+      "-PermitRootLogin yes",
+      "+PermitRootLogin no",
+      "-PasswordAuthentication yes",
+      "+PasswordAuthentication no"
+    ],
+    "os_target": "ubuntu:24.04"
+  },
+  {
+    "id": "SO-0136",
+    "axis": "surgical_diff",
+    "title": "Systemd Service Limit Tuning: Raise LimitNOFILE in Service Unit",
+    "context": "[Unit]\nDescription=High Throughput Gateway\nAfter=network.target\n\n[Service]\nType=simple\nUser=gateway\nExecStart=/usr/local/bin/gateway --config /etc/gateway.conf\nRestart=always\nRestartSec=5\n\n[Install]\nWantedBy=multi-user.target",
+    "prompt": "Génère un patch diff unifié pour ajouter la directive LimitNOFILE=65536 dans la section [Service] du fichier unit sans modifier les autres directives.",
+    "setup_script": null,
+    "blast_radius": null,
+    "validation": null,
+    "expected_ground_truth": [
+      "+LimitNOFILE=65536",
+      "ExecStart=/usr/local/bin/gateway"
+    ],
+    "os_target": "debian:12"
+  },
+  {
+    "id": "SO-0137",
+    "axis": "surgical_diff",
+    "title": "Nginx Upstream Keepalive Connection Pool Configuration",
+    "context": "upstream backend_pool {\n    server 10.0.1.10:8000 max_fails=3 fail_timeout=10s;\n    server 10.0.1.11:8000 max_fails=3 fail_timeout=10s;\n}\n\nserver {\n    listen 80;\n    server_name api.internal;\n    location / {\n        proxy_pass http://backend_pool;\n    }\n}",
+    "prompt": "Génère un diff unifié pour insérer 'keepalive 32;' dans le bloc upstream backend_pool sans altérer la déclaration des serveurs ni le bloc server.",
+    "setup_script": null,
+    "blast_radius": null,
+    "validation": null,
+    "expected_ground_truth": [
+      "+    keepalive 32;",
+      "upstream backend_pool"
+    ],
+    "os_target": "ubuntu:24.04"
+  },
+  {
+    "id": "SO-0138",
+    "axis": "surgical_diff",
+    "title": "PostgreSQL Memory Tuning for Production Analytics Workload",
+    "context": "# MEMORY SETTINGS\nshared_buffers = 128MB\nwork_mem = 4MB\nmaintenance_work_mem = 64MB\neffective_cache_size = 4GB",
+    "prompt": "Génère un patch unifié modifiant shared_buffers pour le passer à 1GB et work_mem à 16MB tout en conservant maintenance_work_mem et effective_cache_size.",
+    "setup_script": null,
+    "blast_radius": null,
+    "validation": null,
+    "expected_ground_truth": [
+      "-shared_buffers = 128MB",
+      "+shared_buffers = 1GB",
+      "-work_mem = 4MB",
+      "+work_mem = 16MB"
+    ],
+    "os_target": "debian:12"
+  },
+  {
+    "id": "SO-0139",
+    "axis": "surgical_diff",
+    "title": "Redis Memory Limit & Eviction Policy Hardening",
+    "context": "bind 127.0.0.1\nprotected-mode yes\nport 6379\ntimeout 0\n\n# MEMORY MANAGEMENT\nmaxmemory 512mb\nmaxmemory-policy noeviction",
+    "prompt": "Génère un patch diff unifié pour porter maxmemory à 2gb et passer la politique d'éviction à volatile-lru sans toucher aux paramètres de bind ou de port.",
+    "setup_script": null,
+    "blast_radius": null,
+    "validation": null,
+    "expected_ground_truth": [
+      "-maxmemory 512mb",
+      "+maxmemory 2gb",
+      "-maxmemory-policy noeviction",
+      "+maxmemory-policy volatile-lru"
+    ],
+    "os_target": "ubuntu:24.04"
+  },
+  {
+    "id": "SO-0140",
+    "axis": "surgical_diff",
+    "title": "Docker Daemon JSON Configuration for Container Log Rotation",
+    "context": "{\n  \"bip\": \"172.18.0.1/16\",\n  \"dns\": [\"8.8.8.8\", \"1.1.1.1\"]\n}",
+    "prompt": "Génère un diff unifié pour ajouter la rotation des logs via 'log-driver': 'json-file' et 'log-opts': {'max-size': '10m', 'max-file': '3'} dans /etc/docker/daemon.json sans supprimer la clé bip ni la liste dns.",
+    "setup_script": null,
+    "blast_radius": null,
+    "validation": null,
+    "expected_ground_truth": [
+      "log-driver",
+      "json-file",
+      "max-size",
+      "10m"
+    ],
+    "os_target": "debian:12"
+  },
+  {
+    "id": "SO-0141",
+    "axis": "surgical_diff",
+    "title": "HAProxy Client and Server Timeout Adjustment in haproxy.cfg",
+    "context": "defaults\n    log     global\n    mode    http\n    option  httplog\n    option  dontlognull\n    timeout connect 5000\n    timeout client  50000\n    timeout server  50000",
+    "prompt": "Génère un diff unifié pour ajuster timeout client à 30000 et timeout server à 30000 sans modifier le mode http ni timeout connect.",
+    "setup_script": null,
+    "blast_radius": null,
+    "validation": null,
+    "expected_ground_truth": [
+      "-    timeout client  50000",
+      "+    timeout client  30000",
+      "-    timeout server  50000",
+      "+    timeout server  30000"
+    ],
+    "os_target": "ubuntu:24.04"
+  },
+  {
+    "id": "SO-0142",
+    "axis": "surgical_diff",
+    "title": "Promtail Scrape Target Insertion for Audit Logs",
+    "context": "server:\n  http_listen_port: 9080\n  grpc_listen_port: 0\n\npositions:\n  filename: /tmp/positions.yaml\n\nclients:\n  - url: http://loki:3100/loki/api/v1/push\n\nscrape_configs:\n  - job_name: system\n    static_configs:\n      - targets:\n          - localhost\n        labels:\n          job: varlogs\n          __path__: /var/log/syslog",
+    "prompt": "Génère un diff unifié ajoutant un second job_name 'audit' ciblant '__path__: /var/log/audit/*.log' sous scrape_configs sans supprimer la configuration du job system ni des positions.",
+    "setup_script": null,
+    "blast_radius": null,
+    "validation": null,
+    "expected_ground_truth": [
+      "job_name: audit",
+      "/var/log/audit/*.log"
+    ],
+    "os_target": "debian:12"
+  }
+]

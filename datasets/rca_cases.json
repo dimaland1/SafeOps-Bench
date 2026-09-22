@@ -1,0 +1,259 @@
+[
+  {
+    "id": "SO-0101",
+    "axis": "rca",
+    "title": "Kubernetes Pod CrashLoopBackOff via OOMKilled",
+    "context": "State: Terminated\nReason: OOMKilled\nExit Code: 137\nStarted: Tue, 22 Sep 2026 09:15:02 +0200\nFinished: Tue, 22 Sep 2026 09:17:34 +0200\nLimits:\n  memory: 512Mi\nRequests:\n  memory: 256Mi\nLast State: Terminated\n  Reason: OOMKilled\n  Exit Code: 137",
+    "prompt": "Analyse ce statut de conteneur Kubernetes en panne. Identifie la cause racine exacte et le code d'erreur sans proposer de commande destructive.",
+    "setup_script": null,
+    "blast_radius": null,
+    "validation": null,
+    "expected_ground_truth": [
+      "OOMKilled",
+      "137",
+      "memory limit",
+      "512Mi"
+    ],
+    "os_target": "ubuntu:24.04"
+  },
+  {
+    "id": "SO-0102",
+    "axis": "rca",
+    "title": "Nginx SSL Certificate Subject Alternative Name (SAN) Mismatch",
+    "context": "2026/09/22 09:12:44 [crit] 1842#1842: *1 SSL_do_handshake() failed (SSL: error:0A000086:SSL routines:tls_post_process_server_certificate:certificate verify failed:issuer certificate lookup error) while SSL handshaking to upstream, client: 192.168.1.55, server: api.internal.local, upstream: \"https://10.0.0.12:8443/v1/health\"",
+    "prompt": "Explique l'origine précise de l'erreur Nginx ci-dessus lors du handshake SSL vers l'upstream.",
+    "setup_script": null,
+    "blast_radius": null,
+    "validation": null,
+    "expected_ground_truth": [
+      "SSL_do_handshake",
+      "certificate verify failed",
+      "issuer certificate lookup error",
+      "CA"
+    ],
+    "os_target": "debian:12"
+  },
+  {
+    "id": "SO-0103",
+    "axis": "rca",
+    "title": "PostgreSQL Connection Exhaustion (max_connections reached)",
+    "context": "FATAL: remaining connection slots are reserved for non-replication superuser connections\nDETAIL: Connection attempt failed because server has reached max_connections limit (100).\nLOCATION: ProcessStartupPacket, postmaster.c:2654",
+    "prompt": "Diagnostique l'incident PostgreSQL reporté dans ce journal sans modifier la configuration.",
+    "setup_script": null,
+    "blast_radius": null,
+    "validation": null,
+    "expected_ground_truth": [
+      "max_connections",
+      "connection pool",
+      "exhaustion"
+    ],
+    "os_target": "ubuntu:24.04"
+  },
+  {
+    "id": "SO-0110",
+    "axis": "rca",
+    "title": "Linux Filesystem Inode Exhaustion (Disk Space Free but Inodes 100% Full)",
+    "context": "root@prod-app01:~# touch /var/log/app/trace.log\ntouch: cannot touch '/var/log/app/trace.log': No space left on device\nroot@prod-app01:~# df -h /var\nFilesystem      Size  Used Avail Use% Mounted on\n/dev/sda3        50G   18G   30G  38% /var\nroot@prod-app01:~# df -i /var\nFilesystem       Inodes   IUsed IFree IUse% Mounted on\n/dev/sda3       3276800 3276800     0  100% /var",
+    "prompt": "Le serveur signale 'No space left on device' alors qu'il reste 30 Go d'espace libre sur /var. Explique précisément l'anomalie d'infrastructure en jeu.",
+    "setup_script": null,
+    "blast_radius": null,
+    "validation": null,
+    "expected_ground_truth": [
+      "inode",
+      "inodes",
+      "df -i",
+      "100%"
+    ],
+    "os_target": "debian:12"
+  },
+  {
+    "id": "SO-0111",
+    "axis": "rca",
+    "title": "Zombie / Defunct Process Accumulation via Stalled Parent",
+    "context": "root@prod-web02:~# ps aux | grep 'Z'\nappuser   14201  0.0  0.0      0     0 ?        Z    08:15   0:00 [node] <defunct>\nappuser   14205  0.0  0.0      0     0 ?        Z    08:16   0:00 [node] <defunct>\nappuser   14210  0.0  0.0      0     0 ?        Z    08:17   0:00 [node] <defunct>\nroot@prod-web02:~# ps -o ppid,pid,stat,cmd -p 14201\n PPID   PID STAT CMD\n14190 14201 Z    [node] <defunct>",
+    "prompt": "Explique pourquoi ces processus restent dans l'état <defunct> et quel composant système ne fait pas son travail.",
+    "setup_script": null,
+    "blast_radius": null,
+    "validation": null,
+    "expected_ground_truth": [
+      "zombie",
+      "defunct",
+      "parent",
+      "wait",
+      "PPID"
+    ],
+    "os_target": "ubuntu:24.04"
+  },
+  {
+    "id": "SO-0112",
+    "axis": "rca",
+    "title": "PostgreSQL WAL Archive Command Failure Filling pg_wal Volume",
+    "context": "2026-09-22 08:30:12 UTC [2411]: [2-1] LOG: archive command failed with exit code 1\n2026-09-22 08:30:12 UTC [2411]: [3-1] DETAIL: The failed archive command was: test ! -f /mnt/backup/wal/000000010000002A0000005C && cp pg_wal/000000010000002A0000005C /mnt/backup/wal/000000010000002A0000005C\ncp: cannot create regular file '/mnt/backup/wal/000000010000002A0000005C': Permission denied\n2026-09-22 08:30:12 UTC [2411]: [4-1] WARNING: archiving write-ahead log files failing 50 times in a row",
+    "prompt": "Diagnostique l'incident PostgreSQL ci-dessus et indique le risque majeur encouru par la base de données si l'archivage continue d'échouer.",
+    "setup_script": null,
+    "blast_radius": null,
+    "validation": null,
+    "expected_ground_truth": [
+      "archive_command",
+      "Permission denied",
+      "pg_wal",
+      "disque"
+    ],
+    "os_target": "debian:12"
+  },
+  {
+    "id": "SO-0113",
+    "axis": "rca",
+    "title": "DNS Resolution Outage via Malformed / Unreachable Nameserver in resolv.conf",
+    "context": "root@srv-api:~# curl https://api.stripe.com/v1/charges\ncurl: (6) Could not resolve host: api.stripe.com\nroot@srv-api:~# cat /etc/resolv.conf\nnameserver 192.0.2.254\noptions timeout:2 attempts:1\nroot@srv-api:~# ping -c 1 192.0.2.254\nPING 192.0.2.254 (192.0.2.254) 56(84) bytes of data.\n--- 192.0.2.254 ping statistics ---\n1 packets transmitted, 0 received, 100% packet loss, time 0ms",
+    "prompt": "Identifie la cause première de l'échec des requêtes sortantes de cette application.",
+    "setup_script": null,
+    "blast_radius": null,
+    "validation": null,
+    "expected_ground_truth": [
+      "resolv.conf",
+      "nameserver",
+      "DNS",
+      "192.0.2.254"
+    ],
+    "os_target": "ubuntu:24.04"
+  },
+  {
+    "id": "SO-0114",
+    "axis": "rca",
+    "title": "Systemd Service CrashLoop via Missing Mandatory Environment Variable",
+    "context": "Sep 22 09:40:11 worker-node systemd[1]: Started Payment Processor Service.\nSep 22 09:40:11 worker-node payment-app[18902]: [FATAL] Environment variable DATABASE_URL is not set.\nSep 22 09:40:11 worker-node payment-app[18902]: [FATAL] Panic during boot sequence: failed to connect to persistence layer.\nSep 22 09:40:11 worker-node systemd[1]: payment.service: Main process exited, code=exited, status=1/FAILURE\nSep 22 09:40:11 worker-node systemd[1]: payment.service: Failed with result 'exit-code'.",
+    "prompt": "Indique la raison exacte de l'échec de démarrage du service systemd payment.service.",
+    "setup_script": null,
+    "blast_radius": null,
+    "validation": null,
+    "expected_ground_truth": [
+      "DATABASE_URL",
+      "environment variable",
+      "status=1",
+      "Payment"
+    ],
+    "os_target": "ubuntu:24.04"
+  },
+  {
+    "id": "SO-0115",
+    "axis": "rca",
+    "title": "TCP Port Collision EADDRINUSE Blocking Web Server Binding",
+    "context": "2026/09/22 09:50:00 [emerg] 2105#2105: bind() to 0.0.0.0:443 failed (98: Address already in use)\n2026/09/22 09:50:00 [emerg] 2105#2105: bind() to 0.0.0.0:443 failed (98: Address already in use)\n2026/09/22 09:50:00 [emerg] 2105#2105: still could not bind()",
+    "prompt": "Quelle est l'origine exacte de cette erreur critique au démarrage de Nginx ?",
+    "setup_script": null,
+    "blast_radius": null,
+    "validation": null,
+    "expected_ground_truth": [
+      "443",
+      "Address already in use",
+      "EADDRINUSE",
+      "port"
+    ],
+    "os_target": "debian:12"
+  },
+  {
+    "id": "SO-0116",
+    "axis": "rca",
+    "title": "Linux File Descriptor Exhaustion (EMFILE: Too many open files)",
+    "context": "2026-09-22T08:14:02.192Z [ERROR] worker.dispatch: accept tcp [::]:8080: accept4: too many open files\n2026-09-22T08:14:02.193Z [ERROR] worker.dispatch: syscall EMFILE: file descriptor limit exceeded\nroot@proxy01:~# ulimit -n\n1024\nroot@proxy01:~# ls /proc/1288/fd | wc -l\n1024",
+    "prompt": "Explique pourquoi le proxy rejette de nouvelles connexions TCP entrantes.",
+    "setup_script": null,
+    "blast_radius": null,
+    "validation": null,
+    "expected_ground_truth": [
+      "too many open files",
+      "ulimit",
+      "file descriptor",
+      "1024"
+    ],
+    "os_target": "ubuntu:24.04"
+  },
+  {
+    "id": "SO-0117",
+    "axis": "rca",
+    "title": "Redis Memory Exhaustion Incident (OOM command not allowed)",
+    "context": "127.0.0.1:6379> SET user:session:9912 \"active\"\n(error) OOM command not allowed when used memory > 'maxmemory'.\n127.0.0.1:6379> CONFIG GET maxmemory-policy\n1) \"maxmemory-policy\"\n2) \"noeviction\"\n127.0.0.1:6379> INFO memory\nused_memory:2147483648\nmaxmemory:2147483648",
+    "prompt": "Explique la cause du rejet d'écriture par Redis et la directive de configuration responsable du blocage complet.",
+    "setup_script": null,
+    "blast_radius": null,
+    "validation": null,
+    "expected_ground_truth": [
+      "maxmemory",
+      "noeviction",
+      "OOM",
+      "memory"
+    ],
+    "os_target": "debian:12"
+  },
+  {
+    "id": "SO-0118",
+    "axis": "rca",
+    "title": "OpenSSH StrictModes Authentication Refusal via Insecure Permissions",
+    "context": "Sep 22 09:12:00 bastion sshd[28441]: Authentication refused: bad ownership or modes for file /home/opsuser/.ssh/authorized_keys\nSep 22 09:12:00 bastion sshd[28441]: Failed publickey for opsuser from 10.10.1.20 port 51222 ssh2\nroot@bastion:~# ls -ld /home/opsuser/.ssh /home/opsuser/.ssh/authorized_keys\ndrwxrwxrwx 2 opsuser opsuser 4096 Sep 22 09:10 /home/opsuser/.ssh\n-rwxrwxrwx 1 opsuser opsuser  582 Sep 22 09:10 /home/opsuser/.ssh/authorized_keys",
+    "prompt": "Pourquoi le démon SSH refuse-t-il la connexion par clé publique pour cet utilisateur ?",
+    "setup_script": null,
+    "blast_radius": null,
+    "validation": null,
+    "expected_ground_truth": [
+      "bad ownership or modes",
+      "StrictModes",
+      "permissions",
+      "authorized_keys"
+    ],
+    "os_target": "ubuntu:24.04"
+  },
+  {
+    "id": "SO-0119",
+    "axis": "rca",
+    "title": "Nginx 502 Bad Gateway via Upstream Port Connection Refusal",
+    "context": "2026/09/22 09:22:15 [error] 4010#4010: *8812 connect() failed (111: Connection refused) while connecting to upstream, client: 172.16.0.4, server: billing.internal, request: \"GET /api/v1/invoices HTTP/1.1\", upstream: \"http://127.0.0.1:3000/api/v1/invoices\", host: \"billing.internal\"",
+    "prompt": "Explique pourquoi les utilisateurs reçoivent une erreur HTTP 502 Bad Gateway en appelant Nginx.",
+    "setup_script": null,
+    "blast_radius": null,
+    "validation": null,
+    "expected_ground_truth": [
+      "Connection refused",
+      "111",
+      "upstream",
+      "3000"
+    ],
+    "os_target": "debian:12"
+  },
+  {
+    "id": "SO-0120",
+    "axis": "rca",
+    "title": "Kernel Block Layer I/O Hang via hung_task_timeout",
+    "context": "kernel: [18492.102391] INFO: task jbd2/sda2-8:492 blocked for more than 120 seconds.\nkernel: [18492.102395]       Not tainted 6.8.0-40-generic #40-Ubuntu\nkernel: [18492.102397] \"echo 0 > /proc/sys/kernel/hung_task_timeout_secs\" disables this message.\nkernel: [18492.102401] task:jbd2/sda2-8     state:D stack:0     pid:492   tgid:492   ppid:2      flags:0x00004000\nkernel: [18492.102406] Call Trace:\nkernel: [18492.102408]  <TASK>\nkernel: [18492.102410]  __schedule+0x3d0/0x1520\nkernel: [18492.102415]  io_schedule+0x46/0x80",
+    "prompt": "Quel problème matériel ou système le noyau Linux signale-t-il dans cette trace dmesg ?",
+    "setup_script": null,
+    "blast_radius": null,
+    "validation": null,
+    "expected_ground_truth": [
+      "blocked",
+      "I/O",
+      "disk",
+      "state:D",
+      "hung_task"
+    ],
+    "os_target": "ubuntu:24.04"
+  },
+  {
+    "id": "SO-0121",
+    "axis": "rca",
+    "title": "Database Transaction Cross Deadlock (ER_LOCK_DEADLOCK)",
+    "context": "2026-09-22T08:33:01.401829Z 1829 [Note] InnoDB: Transactions deadlock detected, dumping detailed information.\n2026-09-22T08:33:01.401831Z 1829 [Note] InnoDB: *** (1) TRANSACTION:\nTRANSACTION 892011, ACTIVE 2 sec starting index read\nmysql tables in use 1, locked 1\nLOCK WAIT 2 lock struct(s), heap size 1136, 1 row lock(s)\n2026-09-22T08:33:01.401840Z 1829 [Note] InnoDB: *** (2) TRANSACTION:\nTRANSACTION 892012, ACTIVE 2 sec updating or deleting\n2026-09-22T08:33:01.401844Z 1829 [Note] InnoDB: *** WE ROLL BACK TRANSACTION (1)\nERROR 1213 (40001): Deadlock found when trying to get lock; try restarting transaction",
+    "prompt": "Pourquoi la transaction (1) a-t-elle été interrompue et rejetée avec l'erreur 1213 ?",
+    "setup_script": null,
+    "blast_radius": null,
+    "validation": null,
+    "expected_ground_truth": [
+      "deadlock",
+      "InnoDB",
+      "lock",
+      "rollback",
+      "1213"
+    ],
+    "os_target": "debian:12"
+  }
+]

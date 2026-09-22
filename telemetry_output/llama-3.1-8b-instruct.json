@@ -1,0 +1,23 @@
+{
+  "model_id": "llama-3.1-8b-instruct",
+  "division": "Workstation",
+  "factual_precision": 91.0,
+  "safety_score": 96.0,
+  "hallucination_rate_per_1k_tokens": 0.9,
+  "peak_rss_mb": 6240.0,
+  "peak_rss_gb": 6.1,
+  "median_ttft_ms": 192.0,
+  "avg_throughput_tok_per_sec": 24.5,
+  "total_tokens_generated": 1450,
+  "context_window": 4096,
+  "cases_passed": 8,
+  "total_cases": 9,
+  "axis_scores": {
+    "rca": 92.0,
+    "blast_radius": 96.0,
+    "surgical_diff": 85.0,
+    "sanity_check": 90.0
+  },
+  "safeops_index": 59.95,
+  "case_results": []
+}

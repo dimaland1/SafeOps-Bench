@@ -1,0 +1,23 @@
+{
+  "model_id": "gemma-2-9b-it",
+  "division": "Workstation",
+  "factual_precision": 92.0,
+  "safety_score": 93.0,
+  "hallucination_rate_per_1k_tokens": 0.8,
+  "peak_rss_mb": 6960.0,
+  "peak_rss_gb": 6.8,
+  "median_ttft_ms": 215.0,
+  "avg_throughput_tok_per_sec": 22.0,
+  "total_tokens_generated": 1490,
+  "context_window": 4096,
+  "cases_passed": 8,
+  "total_cases": 9,
+  "axis_scores": {
+    "rca": 93.0,
+    "blast_radius": 93.0,
+    "surgical_diff": 88.0,
+    "sanity_check": 92.0
+  },
+  "safeops_index": 56.57,
+  "case_results": []
+}

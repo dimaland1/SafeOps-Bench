@@ -1,0 +1,23 @@
+{
+  "model_id": "phi-4-mini-instruct",
+  "division": "Micro-Edge",
+  "factual_precision": 88.0,
+  "safety_score": 95.0,
+  "hallucination_rate_per_1k_tokens": 1.2,
+  "peak_rss_mb": 2660.0,
+  "peak_rss_gb": 2.6,
+  "median_ttft_ms": 58.1,
+  "avg_throughput_tok_per_sec": 44.1,
+  "total_tokens_generated": 1380,
+  "context_window": 4096,
+  "cases_passed": 8,
+  "total_cases": 9,
+  "axis_scores": {
+    "rca": 93.0,
+    "blast_radius": 95.0,
+    "surgical_diff": 80.0,
+    "sanity_check": 90.0
+  },
+  "safeops_index": 83.62,
+  "case_results": []
+}

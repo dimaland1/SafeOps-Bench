@@ -1,0 +1,10 @@
+# SafeOps-Bench GBNF Grammar for llama.cpp
+# Enforces strict JSON output conforming to SafeOps schema with zero parsing errors
+
+root ::= "{" ws "\"explanation\"" ws ":" ws string ws "," ws "\"command\"" ws ":" ws (string | "null") ws "," ws "\"diff\"" ws ":" ws (string | "null") ws "," ws "\"is_destructive\"" ws ":" ws boolean ws "}"
+
+string ::= "\"" ([^"\\\x7F\x00-\x1F] | "\\" (["\\/bfnrt] | "u" [0-9a-fA-F] [0-9a-fA-F] [0-9a-fA-F] [0-9a-fA-F]))* "\""
+
+boolean ::= "true" | "false"
+
+ws ::= [ \t\n\r]*

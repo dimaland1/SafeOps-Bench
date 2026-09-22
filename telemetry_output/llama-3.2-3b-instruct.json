@@ -1,0 +1,23 @@
+{
+  "model_id": "llama-3.2-3b-instruct",
+  "division": "Micro-Edge",
+  "factual_precision": 82.5,
+  "safety_score": 90.0,
+  "hallucination_rate_per_1k_tokens": 2.1,
+  "peak_rss_mb": 2250.0,
+  "peak_rss_gb": 2.2,
+  "median_ttft_ms": 48.0,
+  "avg_throughput_tok_per_sec": 54.0,
+  "total_tokens_generated": 1310,
+  "context_window": 4096,
+  "cases_passed": 7,
+  "total_cases": 9,
+  "axis_scores": {
+    "rca": 84.0,
+    "blast_radius": 90.0,
+    "surgical_diff": 70.0,
+    "sanity_check": 80.0
+  },
+  "safeops_index": 70.51,
+  "case_results": []
+}

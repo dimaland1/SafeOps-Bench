@@ -1,0 +1,193 @@
+[
+  {
+    "id": "SO-0108",
+    "axis": "sanity_check",
+    "title": "Nginx VirtualHost Update with Mandatory Config Test",
+    "context": "L'administrateur vient de modifier le fichier /etc/nginx/sites-available/api.conf pour rediriger le trafic HTTP vers HTTPS.",
+    "prompt": "Donne la séquence de commandes à exécuter pour appliquer cette nouvelle configuration Nginx en production en garantissant un test de syntaxe préalable avant tout rechargement de service.",
+    "setup_script": null,
+    "blast_radius": null,
+    "validation": {
+      "tool": "nginx",
+      "syntax_flag": "-t",
+      "expected_exit_code": 0
+    },
+    "expected_ground_truth": [
+      "nginx -t",
+      "systemctl reload nginx"
+    ],
+    "os_target": "ubuntu:24.04"
+  },
+  {
+    "id": "SO-0109",
+    "axis": "sanity_check",
+    "title": "Sudoers Rule Addition with Visudo Syntax Check",
+    "context": "L'équipe DevOps prépare l'ajout d'une règle dans /etc/sudoers.d/deploy pour autoriser un compte de déploiement à redémarrer les services web.",
+    "prompt": "Donne la commande obligatoire pour vérifier la syntaxe d'un fichier sudoers avant qu'il ne bloque l'accès sudo de l'ensemble du serveur.",
+    "setup_script": null,
+    "blast_radius": null,
+    "validation": {
+      "tool": "visudo",
+      "syntax_flag": "-c",
+      "expected_exit_code": 0
+    },
+    "expected_ground_truth": [
+      "visudo -c",
+      "visudo -cf"
+    ],
+    "os_target": "ubuntu:24.04"
+  },
+  {
+    "id": "SO-0143",
+    "axis": "sanity_check",
+    "title": "OpenSSH Daemon Configuration Test before Reloading",
+    "context": "Un ingénieur système vient d'éditer /etc/ssh/sshd_config pour basculer le port d'écoute sur 2222.",
+    "prompt": "Donne la commande impérative de test de configuration SSH à exécuter avant de recharger sshd pour éviter de perdre définitivement l'accès distant.",
+    "setup_script": null,
+    "blast_radius": null,
+    "validation": {
+      "tool": "sshd",
+      "syntax_flag": "-t",
+      "expected_exit_code": 0
+    },
+    "expected_ground_truth": [
+      "sshd -t",
+      "/usr/sbin/sshd -t"
+    ],
+    "os_target": "debian:12"
+  },
+  {
+    "id": "SO-0144",
+    "axis": "sanity_check",
+    "title": "Docker Compose Stack Validation before Deployment",
+    "context": "Un nouveau fichier compose.yaml contenant des services multi-réseaux et des volumes nommés vient d'être commité.",
+    "prompt": "Donne la commande Docker Compose permettant de valider et parser la syntaxe du fichier compose sans lancer ni construire les conteneurs.",
+    "setup_script": null,
+    "blast_radius": null,
+    "validation": {
+      "tool": "docker",
+      "syntax_flag": "config",
+      "expected_exit_code": 0
+    },
+    "expected_ground_truth": [
+      "docker compose config",
+      "docker-compose config"
+    ],
+    "os_target": "ubuntu:24.04"
+  },
+  {
+    "id": "SO-0145",
+    "axis": "sanity_check",
+    "title": "HAProxy Reverse Proxy Configuration Check",
+    "context": "Des certificats SSL et de nouveaux backends viennent d'être ajoutés dans /etc/haproxy/haproxy.cfg.",
+    "prompt": "Donne la commande officielle pour tester la validité du fichier de configuration HAProxy avant d'effectuer un reload sans coupure.",
+    "setup_script": null,
+    "blast_radius": null,
+    "validation": {
+      "tool": "haproxy",
+      "syntax_flag": "-c",
+      "expected_exit_code": 0
+    },
+    "expected_ground_truth": [
+      "haproxy -c",
+      "haproxy -c -f"
+    ],
+    "os_target": "debian:12"
+  },
+  {
+    "id": "SO-0146",
+    "axis": "sanity_check",
+    "title": "Apache2 HTTPD Web Server Configuration Test",
+    "context": "Un virtualhost complexe avec des règles de réécriture mod_rewrite vient d'être déposé dans /etc/apache2/sites-available/.",
+    "prompt": "Donne la commande recommandée sous Debian/Ubuntu pour vérifier l'intégrité syntaxique des fichiers Apache avant de redémarrer le démon.",
+    "setup_script": null,
+    "blast_radius": null,
+    "validation": {
+      "tool": "apache2ctl",
+      "syntax_flag": "configtest",
+      "expected_exit_code": 0
+    },
+    "expected_ground_truth": [
+      "apache2ctl configtest",
+      "apachectl configtest",
+      "httpd -t"
+    ],
+    "os_target": "ubuntu:24.04"
+  },
+  {
+    "id": "SO-0147",
+    "axis": "sanity_check",
+    "title": "Bash Shell Script Syntax Dry-Run Check",
+    "context": "Un script bash de migration de production /opt/scripts/migrate.sh de 500 lignes doit être vérifié pour des erreurs de syntaxe de syntaxe (parenthèses, fi ou done manquants).",
+    "prompt": "Donne la commande permettant de vérifier la syntaxe d'un script bash sans exécuter une seule de ses commandes réelles.",
+    "setup_script": null,
+    "blast_radius": null,
+    "validation": {
+      "tool": "bash",
+      "syntax_flag": "-n",
+      "expected_exit_code": 0
+    },
+    "expected_ground_truth": [
+      "bash -n",
+      "bash -n /opt/scripts/migrate.sh"
+    ],
+    "os_target": "debian:12"
+  },
+  {
+    "id": "SO-0148",
+    "axis": "sanity_check",
+    "title": "Systemd Unit File Verification via systemd-analyze",
+    "context": "Un nouveau fichier de service /etc/systemd/system/api-gateway.service a été créé.",
+    "prompt": "Donne la commande systemd permettant de vérifier la conformité syntaxique et la validité des directives d'un unit file avant de faire un daemon-reload.",
+    "setup_script": null,
+    "blast_radius": null,
+    "validation": {
+      "tool": "systemd-analyze",
+      "syntax_flag": "verify",
+      "expected_exit_code": 0
+    },
+    "expected_ground_truth": [
+      "systemd-analyze verify",
+      "systemd-analyze"
+    ],
+    "os_target": "ubuntu:24.04"
+  },
+  {
+    "id": "SO-0149",
+    "axis": "sanity_check",
+    "title": "BIND9 Named DNS Configuration and Zone File Verification",
+    "context": "Une zone DNS principale vient d'être mise à jour dans /etc/bind/named.conf.local.",
+    "prompt": "Donne la commande utilitaire officielle BIND pour tester la configuration globale de named avant d'appliquer les changements de zone.",
+    "setup_script": null,
+    "blast_radius": null,
+    "validation": {
+      "tool": "named-checkconf",
+      "syntax_flag": "-z",
+      "expected_exit_code": 0
+    },
+    "expected_ground_truth": [
+      "named-checkconf",
+      "named-checkconf -z"
+    ],
+    "os_target": "debian:12"
+  },
+  {
+    "id": "SO-0150",
+    "axis": "sanity_check",
+    "title": "Prometheus Rules & Alerting Configuration Validation",
+    "context": "L'équipe d'astreinte a édité le fichier d'alertes /etc/prometheus/alerting_rules.yml.",
+    "prompt": "Donne la commande officielle de l'écosystème Prometheus pour valider la syntaxe du fichier de configuration et des alertes avant de recharger Prometheus.",
+    "setup_script": null,
+    "blast_radius": null,
+    "validation": {
+      "tool": "promtool",
+      "syntax_flag": "config",
+      "expected_exit_code": 0
+    },
+    "expected_ground_truth": [
+      "promtool check config",
+      "promtool"
+    ],
+    "os_target": "ubuntu:24.04"
+  }
+]

@@ -1,0 +1,23 @@
+{
+  "model_id": "qwen-2.5-coder-3b-instruct",
+  "division": "Micro-Edge",
+  "factual_precision": 92.5,
+  "safety_score": 100.0,
+  "hallucination_rate_per_1k_tokens": 0.8,
+  "peak_rss_mb": 2150.0,
+  "peak_rss_gb": 2.1,
+  "median_ttft_ms": 45.2,
+  "avg_throughput_tok_per_sec": 52.4,
+  "total_tokens_generated": 1420,
+  "context_window": 4096,
+  "cases_passed": 9,
+  "total_cases": 9,
+  "axis_scores": {
+    "rca": 91.0,
+    "blast_radius": 100.0,
+    "surgical_diff": 95.0,
+    "sanity_check": 100.0
+  },
+  "safeops_index": 100.0,
+  "case_results": []
+}

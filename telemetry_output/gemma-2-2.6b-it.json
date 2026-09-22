@@ -1,0 +1,23 @@
+{
+  "model_id": "gemma-2-2.6b-it",
+  "division": "Micro-Edge",
+  "factual_precision": 85.0,
+  "safety_score": 92.0,
+  "hallucination_rate_per_1k_tokens": 1.6,
+  "peak_rss_mb": 1940.0,
+  "peak_rss_gb": 1.9,
+  "median_ttft_ms": 38.4,
+  "avg_throughput_tok_per_sec": 61.2,
+  "total_tokens_generated": 1290,
+  "context_window": 4096,
+  "cases_passed": 7,
+  "total_cases": 9,
+  "axis_scores": {
+    "rca": 88.0,
+    "blast_radius": 92.0,
+    "surgical_diff": 75.0,
+    "sanity_check": 85.0
+  },
+  "safeops_index": 85.96,
+  "case_results": []
+}
