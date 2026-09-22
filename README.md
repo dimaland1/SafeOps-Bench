@@ -24,20 +24,20 @@ Unlike traditional code generation benchmarks that measure abstract Python funct
 
 ## 🏆 Certified Leaderboard (NVIDIA RTX 4090 • 50 Test Cases)
 
-| Rank | Model | Division | SafeOps Index | Factual Precision | Safety Score | Halluc./1k | Peak RAM | Median TTFT | Throughput |
+| Rank | Model | Division | SafeOps Index V2 | Factual Precision | Safety Score | Halluc./1k | Peak RAM | Median TTFT | Throughput |
 | :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| 1 | `qwen2.5-coder:1.5b` | **Micro-Edge** | **84.82** | 45.1% | 98.0% | 0.0 | **1.09 GB** | 82.3 ms | 107.1 tok/s |
-| 2 | `qwen2.5:3b` | **Micro-Edge** | **75.98** | 53.9% | 100.0% | 0.0 | **2.01 GB** | 126.7 ms | 109.8 tok/s |
-| 3 | `ministral-3:3b` | **Micro-Edge** | **75.16** | 62.0% | 100.0% | 0.0 | **2.54 GB** | 191.3 ms | 87.9 tok/s |
-| 4 | `gemma2:2b` | **Micro-Edge** | **74.49** | 49.8% | 100.0% | 0.0 | **1.79 GB** | 141.5 ms | 88.6 tok/s |
-| 5 | `deepseek-r1:1.5b` | **Micro-Edge** | **64.68** | 36.4% | 100.0% | 0.0 | **1.27 GB** | 2629.7 ms | 27.0 tok/s |
-| 6 | `phi4-mini:latest` | **Micro-Edge** | **56.94** | 53.3% | 100.0% | 0.0 | **2.88 GB** | 194.0 ms | 72.8 tok/s |
-| 7 | `qwen2.5-coder:7b` | **Workstation** | **54.13** | 59.7% | 98.0% | 0.0 | **4.42 GB** | 171.0 ms | 63.7 tok/s |
-| 8 | `llama3.2:3b` | **Micro-Edge** | **53.71** | 44.4% | 100.0% | 0.0 | **2.38 GB** | 127.5 ms | 108.0 tok/s |
-| 9 | `mistral:7b` | **Workstation** | **43.63** | 47.8% | 98.0% | 0.0 | **4.61 GB** | 272.8 ms | 68.2 tok/s |
-| 10 | `llama3.1:8b` | **Workstation** | **43.29** | 49.4% | 100.0% | 0.0 | **4.91 GB** | 204.3 ms | 62.3 tok/s |
-| 11 | `deepseek-r1:7b` | **Workstation** | **39.54** | 49.8% | 96.0% | 0.0 | **4.78 GB** | 6002.3 ms | 22.7 tok/s |
-| 12 | `gemma2:9b` | **Workstation** | **35.80** | 45.3% | 100.0% | 0.0 | **5.83 GB** | 413.9 ms | 39.4 tok/s |
+| 🥇 1 | `ministral-3:3b` | **Micro-Edge** | **59.85** | **62.0%** | **100.0%** | 0.18 | **2.54 GB** | 191.3 ms | 87.9 tok/s |
+| 🥈 2 | `qwen2.5-coder:7b` | **Workstation** | **54.13** | 59.7% | 98.0% | 0.14 | 4.42 GB | 171.0 ms | 63.7 tok/s |
+| 🥉 3 | `qwen2.5:3b` | **Micro-Edge** | **53.87** | 53.9% | 100.0% | 0.0 | **2.01 GB** | 126.7 ms | 109.8 tok/s |
+| 4 | `gemma2:2b` | **Micro-Edge** | **49.80** | 49.8% | 100.0% | 0.0 | **1.79 GB** | 141.5 ms | 88.6 tok/s |
+| 5 | `phi4-mini:latest` | **Micro-Edge** | **48.28** | 53.3% | 100.0% | 0.52 | **2.88 GB** | 194.0 ms | 72.8 tok/s |
+| 6 | `qwen2.5-coder:1.5b` | **Micro-Edge** | **44.20** | 45.1% | 98.0% | 0.0 | **1.09 GB** | 82.3 ms | 107.1 tok/s |
+| 7 | `mistral:7b` | **Workstation** | **43.63** | 47.8% | 98.0% | 0.0 | 4.61 GB | 272.8 ms | 68.2 tok/s |
+| 8 | `llama3.1:8b` | **Workstation** | **43.29** | 49.4% | 100.0% | 0.15 | 4.91 GB | 204.3 ms | 62.3 tok/s |
+| 9 | `llama3.2:3b` | **Micro-Edge** | **41.42** | 44.4% | 100.0% | 0.36 | **2.38 GB** | 127.5 ms | 108.0 tok/s |
+| 10 | `gemma2:9b` | **Workstation** | **35.80** | 45.3% | 100.0% | 0.24 | 5.83 GB | 413.9 ms | 39.4 tok/s |
+| 11 | `deepseek-r1:1.5b` | **Micro-Edge** | **24.04** | 36.4% | 100.0% | 0.0 | **1.27 GB** | 2629.7 ms | 27.0 tok/s |
+| 12 | `deepseek-r1:7b` | **Workstation** | **21.24** | 49.8% | 96.0% | 0.53 | 4.78 GB | 6002.3 ms | 22.7 tok/s |
 
 > *Full interactive Pareto frontier, TTFT vs Precision scatter, 4-axes breakdown, bilingual toggle (EN/FR), deep linking, and open telemetry JSON export available at [safeops.jalal.tech](https://safeops.jalal.tech/).*
 
@@ -54,13 +54,15 @@ Unlike traditional code generation benchmarks that measure abstract Python funct
 
 ---
 
-## 🧮 Hardened SafeOps Index Formula
+## 🧮 Hardened SafeOps Index V2 Formula
 
-$$\text{SafeOps Index} = 100 \times \left( \frac{\mathcal{P}_{\text{Factuelle}}}{100} \right) \times \left( \frac{\mathcal{S}_{\text{Safety}}}{100} \right) \times \left( \frac{1}{1 + \alpha \cdot \mathcal{H}_{\text{Rate}}} \right) \times \left( \frac{\text{RAM}_{\text{Baseline}}}{\text{RAM}_{\text{Peak}}} \right)^{\beta}$$
+$$\text{SafeOps Index V2} = 100 \times \left( \frac{\mathcal{P}_{\text{Factuelle}}}{100} \right) \times \left( \frac{\mathcal{S}_{\text{Safety}}}{100} \right) \times \left( \frac{1}{1 + \alpha \cdot \mathcal{H}_{\text{Rate}}} \right) \times \mathcal{M}_{\text{RAM}} \times \mathcal{L}_{\text{TTFT}}$$
 
-* $\text{RAM}_{\text{Baseline}} = 4.0\text{ GB}$
-* $\alpha = 0.2$ (Dampens hallucination: 5 fake flags / 1,000 tokens cuts score in half)
-* $\beta = 0.5$ (Sub-linear memory moderator)
+* **Memory Term ($\mathcal{M}_{\text{RAM}}$):** $\min\left(1.0, \; \left( \frac{4.0}{\text{RAM}_{\text{Peak}}} \right)^{0.5} \right)$
+  * Capped at $1.0$: Models within the $\le 4.0\text{ GB}$ edge quota are compliant without receiving artificial score inflation that masks poor accuracy. Models exceeding $4.0\text{ GB}$ are penalized proportionally.
+* **Streaming Latency Term ($\mathcal{L}_{\text{TTFT}}$):** $\min\left(1.0, \; \left( \frac{500.0}{\max(500.0, \; \text{TTFT}_{\text{Median}})} \right)^{0.25} \right)$
+  * Interactive responses ($\le 500\text{ ms}$) receive no penalty. Delays exceeding $500\text{ ms}$ (e.g. 2.6s–6.0s for reasoning models that freeze the SRE terminal during an outage) incur a sublinear penalty.
+* **Hallucination Dampener:** $\alpha = 0.2$ (Dampens unverified CLI flags).
 
 ---
 

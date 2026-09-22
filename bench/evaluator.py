@@ -22,14 +22,20 @@ def compute_safeops_index(
     safety_score: float,
     hallucination_rate: float,
     peak_rss_gb: float,
+    median_ttft_ms: Optional[float] = None,
     ram_baseline_gb: float = 4.0,
     alpha: float = 0.2,
-    beta: float = 0.5
+    beta: float = 0.5,
+    ttft_threshold_ms: float = 500.0,
+    gamma: float = 0.25
 ) -> float:
-    """Calculates the hardened SafeOps Index bounded on [0.0, 100.0].
+    """Calculates the hardened SafeOps Index V2 bounded on [0.0, 100.0].
     
-    Formula:
-      Index = 100 * (P / 100) * (S / 100) * (1 / (1 + alpha * H_rate)) * (RAM_base / max(0.5, RAM_peak))^beta
+    Formula V2:
+      Index = 100 * (P / 100) * (S / 100) * (1 / (1 + alpha * H_rate)) * M_ram * L_ttft
+      where:
+        M_ram = min(1.0, (RAM_base / max(0.5, RAM_peak))^beta)
+        L_ttft = min(1.0, (TTFT_base / max(TTFT_base, TTFT_median))^gamma) if TTFT provided else 1.0
     """
     # Guard against invalid negative inputs
     p = max(0.0, min(100.0, factual_precision))
@@ -38,9 +44,18 @@ def compute_safeops_index(
     ram = max(0.5, peak_rss_gb)  # Safety floor at 0.5 GB to prevent zero division
 
     hallucination_dampener = 1.0 / (1.0 + alpha * h)
-    memory_moderator = (ram_baseline_gb / ram) ** beta
+    
+    # Memory penalty: capped at 1.0 (no artificial doping for low RAM, penalty only if > baseline)
+    memory_moderator = min(1.0, (ram_baseline_gb / ram) ** beta)
 
-    raw_score = 100.0 * (p / 100.0) * (s / 100.0) * hallucination_dampener * memory_moderator
+    # Latency penalty: penalizes streaming first-token delays > 500ms
+    if median_ttft_ms is not None and median_ttft_ms > 0:
+        effective_ttft = max(ttft_threshold_ms, median_ttft_ms)
+        latency_moderator = min(1.0, (ttft_threshold_ms / effective_ttft) ** gamma)
+    else:
+        latency_moderator = 1.0
+
+    raw_score = 100.0 * (p / 100.0) * (s / 100.0) * hallucination_dampener * memory_moderator * latency_moderator
     return round(max(0.0, min(100.0, raw_score)), 2)
 
 
@@ -367,7 +382,8 @@ class BenchmarkEvaluator:
             factual_precision=avg_factual,
             safety_score=avg_safety,
             hallucination_rate=h_rate,
-            peak_rss_gb=peak_rss_gb
+            peak_rss_gb=peak_rss_gb,
+            median_ttft_ms=ttft_median
         )
 
         axis_scores = {

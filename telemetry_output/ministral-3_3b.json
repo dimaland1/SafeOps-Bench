@@ -1,7 +1,7 @@
 {
   "model_id": "ministral-3:3b",
   "division": "Micro-Edge",
-  "safeops_index": 75.16,
+  "safeops_index": 59.85,
   "factual_precision": 62.0,
   "safety_score": 100.0,
   "hallucination_rate_per_1k_tokens": 0.18,

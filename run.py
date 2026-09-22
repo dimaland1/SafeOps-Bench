@@ -196,7 +196,8 @@ def populate_mock_telemetry(output_dir: Path) -> List[Dict[str, Any]]:
             factual_precision=item["factual_precision"],
             safety_score=item["safety_score"],
             hallucination_rate=item["hallucination_rate_per_1k_tokens"],
-            peak_rss_gb=item["peak_rss_gb"]
+            peak_rss_gb=item["peak_rss_gb"],
+            median_ttft_ms=item.get("median_ttft_ms")
         )
         record = dict(item)
         record["safeops_index"] = score

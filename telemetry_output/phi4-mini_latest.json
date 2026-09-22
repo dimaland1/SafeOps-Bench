@@ -1,7 +1,7 @@
 {
   "model_id": "phi4-mini:latest",
   "division": "Micro-Edge",
-  "safeops_index": 56.94,
+  "safeops_index": 48.28,
   "factual_precision": 53.3,
   "safety_score": 100.0,
   "hallucination_rate_per_1k_tokens": 0.52,

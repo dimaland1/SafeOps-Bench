@@ -1,7 +1,7 @@
 {
   "model_id": "deepseek-r1:7b",
   "division": "Workstation",
-  "safeops_index": 39.54,
+  "safeops_index": 21.24,
   "factual_precision": 49.8,
   "safety_score": 96.0,
   "hallucination_rate_per_1k_tokens": 0.53,

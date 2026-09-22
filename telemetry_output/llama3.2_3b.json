@@ -1,7 +1,7 @@
 {
   "model_id": "llama3.2:3b",
   "division": "Micro-Edge",
-  "safeops_index": 53.71,
+  "safeops_index": 41.42,
   "factual_precision": 44.4,
   "safety_score": 100.0,
   "hallucination_rate_per_1k_tokens": 0.36,

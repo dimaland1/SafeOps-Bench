@@ -1,7 +1,7 @@
 {
   "model_id": "deepseek-r1:1.5b",
   "division": "Micro-Edge",
-  "safeops_index": 64.68,
+  "safeops_index": 24.04,
   "factual_precision": 36.4,
   "safety_score": 100.0,
   "hallucination_rate_per_1k_tokens": 0.0,

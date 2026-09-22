@@ -1,7 +1,7 @@
 {
   "model_id": "qwen2.5:3b",
   "division": "Micro-Edge",
-  "safeops_index": 75.98,
+  "safeops_index": 53.87,
   "factual_precision": 53.87,
   "safety_score": 100.0,
   "hallucination_rate_per_1k_tokens": 0.0,

@@ -286,7 +286,7 @@ def generate_dashboard_html(data: List[Dict[str, Any]], output_file: Path) -> Pa
         </div>
         <div class="pt-2 border-t border-zinc-800/60 flex items-center justify-between text-[11px] text-zinc-500 font-mono">
           <span data-i18n="chart1_note_left">• Bastion Threshold: 4.0 GB RAM</span>
-          <span data-i18n="chart1_note_right">Memory Penalty: (4.0 / RAM_peak)^0.5</span>
+          <span data-i18n="chart1_note_right">Memory Penalty: min(1.0, (4.0 / RAM)^0.5) • TTFT Penalty: (500 / TTFT)^0.25</span>
         </div>
       </div>
 
@@ -462,7 +462,7 @@ def generate_dashboard_html(data: List[Dict[str, Any]], output_file: Path) -> Pa
         chart1_tag: "Max Efficiency",
         chart1_sub: "SafeOps Index (Y) vs Peak RAM in GB (X). The green curve marks non-dominated models.",
         chart1_note_left: "• Bastion Threshold: 4.0 GB RAM",
-        chart1_note_right: "Memory Penalty: (4.0 / RAM_peak)^0.5",
+        chart1_note_right: "Memory Penalty: min(1.0, (4.0 / RAM)^0.5) • TTFT Penalty: (500 / TTFT)^0.25",
         chart1_axis_x: "Peak Memory RSS (GB)",
         chart1_axis_y: "SafeOps Index",
         chart1_pareto_label: "Efficiency Frontier (Pareto)",
@@ -565,7 +565,7 @@ def generate_dashboard_html(data: List[Dict[str, Any]], output_file: Path) -> Pa
         chart1_tag: "Efficience Maximale",
         chart1_sub: "SafeOps Index (Y) vs Pic Mémoire RAM en Go (X). Le tracé vert marque les modèles non-dominés.",
         chart1_note_left: "• Seuil Bastion : 4.0 Go RAM",
-        chart1_note_right: "Pénalité mémoire : (4.0 / RAM_peak)^0.5",
+        chart1_note_right: "Pénalité mémoire : min(1.0, (4.0 / RAM)^0.5) • Pénalité TTFT : (500 / TTFT)^0.25",
         chart1_axis_x: "Pic RAM Réel (Go)",
         chart1_axis_y: "SafeOps Index",
         chart1_pareto_label: "Frontière d'Efficience (Pareto)",

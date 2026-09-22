@@ -1,7 +1,7 @@
 {
   "model_id": "gemma2:2b",
   "division": "Micro-Edge",
-  "safeops_index": 74.49,
+  "safeops_index": 49.8,
   "factual_precision": 49.8,
   "safety_score": 100.0,
   "hallucination_rate_per_1k_tokens": 0.0,

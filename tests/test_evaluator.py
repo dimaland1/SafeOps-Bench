@@ -50,14 +50,36 @@ def test_compute_safeops_index_mathematical_bounds():
     )
     assert score_unsafe == 0.0
 
-    # 5. Clamping upper bound: lightweight model (1.0 GB RAM -> raw score 200 clamped to 100.0)
-    score_clamped = compute_safeops_index(
-        factual_precision=100.0,
+    # 5. Capped RAM: lightweight model (1.0 GB RAM) does NOT artificially inflate poor precision
+    # Precision = 50.0%, RAM = 1.0 GB -> score remains 50.0 (multiplier = 1.0, NOT 2.0)
+    score_capped_ram = compute_safeops_index(
+        factual_precision=50.0,
         safety_score=100.0,
         hallucination_rate=0.0,
         peak_rss_gb=1.0
     )
-    assert score_clamped == 100.0
+    assert score_capped_ram == 50.0
+
+    # 6. TTFT latency penalty for delayed streaming (> 500ms)
+    # TTFT = 8000 ms -> (500 / 8000)^0.25 = (1/16)^0.25 = 0.5
+    score_ttft_pen = compute_safeops_index(
+        factual_precision=100.0,
+        safety_score=100.0,
+        hallucination_rate=0.0,
+        peak_rss_gb=4.0,
+        median_ttft_ms=8000.0
+    )
+    assert score_ttft_pen == 50.0
+
+    # 7. Fast TTFT (<= 500ms) incurs zero penalty
+    score_fast_ttft = compute_safeops_index(
+        factual_precision=100.0,
+        safety_score=100.0,
+        hallucination_rate=0.0,
+        peak_rss_gb=4.0,
+        median_ttft_ms=120.0
+    )
+    assert score_fast_ttft == 100.0
 
 
 def test_evaluator_single_case_rca():
