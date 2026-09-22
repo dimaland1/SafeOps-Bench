@@ -1,5 +1,16 @@
 # SafeOps-Bench 🛡️
 
+[![Live Benchmark](https://img.shields.io/badge/Live_Benchmark-safeops.jalal.tech-10b981?style=flat-square&logo=cloudflare)](https://safeops.jalal.tech/)
+[![Portfolio](https://img.shields.io/badge/Portfolio-jalal.tech-38bdf8?style=flat-square)](https://jalal.tech)
+[![Hardware Certified](https://img.shields.io/badge/Hardware-1x_NVIDIA_RTX_4090_24GB-76b900?style=flat-square&logo=nvidia)](https://safeops.jalal.tech/)
+[![Incidents](https://img.shields.io/badge/Dataset-50_Real--World_Cases-f59e0b?style=flat-square)](https://safeops.jalal.tech/)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg?style=flat-square)](LICENSE)
+
+> **Live Interactive Leaderboard & Pareto Frontier:** [https://safeops.jalal.tech/](https://safeops.jalal.tech/)  
+> *Architected by **Jalal Azouzout** (AI Platform Engineer) • Certified single-node GPU execution.*
+
+---
+
 **SafeOps-Bench** is a deterministic, execution-grounded benchmark specifically engineered to evaluate Small Language Models (1B–3.8B) and Workstation models (7B–9B) as **non-invasive DevOps companions** on constrained hardware (CPU / $\le 4\text{ GB}$ RAM).
 
 Unlike traditional code generation benchmarks that measure abstract Python functions (HumanEval, MBPP) or rely on biased and costly LLM-as-a-Judge evaluations, SafeOps-Bench enforces **zero tolerance for hallucinations and production-breaking actions** through:
@@ -11,6 +22,27 @@ Unlike traditional code generation benchmarks that measure abstract Python funct
 
 ---
 
+## 🏆 Certified Leaderboard (NVIDIA RTX 4090 • 50 Test Cases)
+
+| Rank | Model | Division | SafeOps Index | Factual Precision | Safety Score | Halluc./1k | Peak RAM | Median TTFT | Throughput |
+| :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| 1 | `qwen2.5-coder:1.5b` | **Micro-Edge** | **84.82** | 45.1% | 98.0% | 0.0 | **1.09 GB** | 82.3 ms | 107.1 tok/s |
+| 2 | `qwen2.5:3b` | **Micro-Edge** | **75.98** | 53.9% | 100.0% | 0.0 | **2.01 GB** | 126.7 ms | 109.8 tok/s |
+| 3 | `ministral-3:3b` | **Micro-Edge** | **75.16** | 62.0% | 100.0% | 0.0 | **2.54 GB** | 191.3 ms | 87.9 tok/s |
+| 4 | `gemma2:2b` | **Micro-Edge** | **74.49** | 49.8% | 100.0% | 0.0 | **1.79 GB** | 141.5 ms | 88.6 tok/s |
+| 5 | `deepseek-r1:1.5b` | **Micro-Edge** | **64.68** | 36.4% | 100.0% | 0.0 | **1.27 GB** | 2629.7 ms | 27.0 tok/s |
+| 6 | `phi4-mini:latest` | **Micro-Edge** | **56.94** | 53.3% | 100.0% | 0.0 | **2.88 GB** | 194.0 ms | 72.8 tok/s |
+| 7 | `qwen2.5-coder:7b` | **Workstation** | **54.13** | 59.7% | 98.0% | 0.0 | **4.42 GB** | 171.0 ms | 63.7 tok/s |
+| 8 | `llama3.2:3b` | **Micro-Edge** | **53.71** | 44.4% | 100.0% | 0.0 | **2.38 GB** | 127.5 ms | 108.0 tok/s |
+| 9 | `mistral:7b` | **Workstation** | **43.63** | 47.8% | 98.0% | 0.0 | **4.61 GB** | 272.8 ms | 68.2 tok/s |
+| 10 | `llama3.1:8b` | **Workstation** | **43.29** | 49.4% | 100.0% | 0.0 | **4.91 GB** | 204.3 ms | 62.3 tok/s |
+| 11 | `deepseek-r1:7b` | **Workstation** | **39.54** | 49.8% | 96.0% | 0.0 | **4.78 GB** | 6002.3 ms | 22.7 tok/s |
+| 12 | `gemma2:9b` | **Workstation** | **35.80** | 45.3% | 100.0% | 0.0 | **5.83 GB** | 413.9 ms | 39.4 tok/s |
+
+> *Full interactive Pareto frontier, TTFT vs Precision scatter, 4-axes breakdown, bilingual toggle (EN/FR), deep linking, and open telemetry JSON export available at [safeops.jalal.tech](https://safeops.jalal.tech/).*
+
+---
+
 ## 📊 The 4 Evaluation Axes
 
 | Axis | Focus | Target Behavior | Critical Failure Condition |
@@ -19,17 +51,6 @@ Unlike traditional code generation benchmarks that measure abstract Python funct
 | **Axe 2: Blast Radius** | Safety & Restraint | Recommending safe inspection tools (`du`, `lsof`, `ncdu`) under incident pressure | Suggesting destructive operations (`rm -rf`, `kill -9`, reboot) |
 | **Axe 3: Surgical Diff** | Precision Configuration | Producing minimal unified diffs (`patch -p1`) without collateral config damage | Overwriting full files, dropping directives, hallucinated keys |
 | **Axe 4: Sanity Check** | Dry-Run Enforcement | Mandating syntax and dry-run validations (`nginx -t`, `visudo -c`) before reload | Blind `systemctl restart` without preliminary verification |
-
----
-
-## 🥊 Model Matrix: The "David vs. Goliath" Face-Off
-
-We evaluate 20 undisputed, official open-weights models quantified in **GGUF Q4_K_M**:
-
-* **Division A: Micro-Edge ($\le 3.8\text{B}$, $\le 4\text{ GB}$ RAM footprint)**
-  * Gemma 2 (2.6B-IT), Qwen 2.5 Coder (1.5B & 3B), SmolLM2 (1.7B), Phi-4-mini (3.8B), Ministral 3B, Llama 3.2 (3B), IBM Granite 3.1 (2B), DeepSeek-R1-Distill-Qwen (1.5B), Liquid LFM-3B.
-* **Division B: Workstation Grade ($7\text{B}\text{--}9\text{B}$ baseline)**
-  * Qwen 2.5 Coder (7B), Gemma 2 (9B-IT), Llama 3.1 (8B), DeepSeek-R1-Distill-Qwen (7B), DeepSeek-R1-Distill-Llama (8B), Ministral 8B, IBM Granite 3.1 (8B), Cohere Command R7B, Mistral-7B-Instruct-v0.3, InternLM 2.5 Coder (7B).
 
 ---
 
@@ -47,8 +68,8 @@ $$\text{SafeOps Index} = 100 \times \left( \frac{\mathcal{P}_{\text{Factuelle}}}
 
 ### 1. Installation
 ```bash
-git clone https://github.com/dimaland1/safeops-bench.git
-cd safeops-bench
+git clone https://github.com/dimaland1/SafeOps-Bench.git
+cd SafeOps-Bench
 pip install -e ".[dev]"
 ```
 
@@ -58,7 +79,23 @@ python scripts/setup_oracle.py
 ```
 This initializes `data/completions.sqlite` with comprehensive verified CLI flag schemas, completely offline with zero host dependencies.
 
-### 3. Run Test Suite
+### 3. Run Benchmark Suite
 ```bash
+# Run unit tests
 pytest
+
+# Evaluate models against test cases
+python run.py --model qwen2.5:3b --limit 50
 ```
+
+### 4. Build Standalone Dashboard & Leaderboard
+```bash
+python -c "from dashboard.generator import load_all_telemetry, generate_dashboard_html, generate_markdown_summary; from pathlib import Path; data = load_all_telemetry(Path('telemetry_output')); generate_dashboard_html(data, Path('docs/index.html')); generate_markdown_summary(data, Path('RESULTS.md'))"
+```
+
+---
+
+## 📄 License
+
+Distributed under the **Apache-2.0 License**. See [`LICENSE`](LICENSE) for more information.  
+Created by **[Jalal Azouzout](https://jalal.tech)** — AI Platform Engineer.

@@ -1,6 +1,8 @@
 """High-density, Staff-grade dashboard and leaderboard generator for SafeOps-Bench.
 Produces a self-contained, zero-CORS static HTML dashboard inspired by Linear/Vercel/Datadog design systems,
 and a GitHub-ready RESULTS.md leaderboard.
+Features full bilingual (EN/FR) support, deep linking (#model=, #lang=), open data JSON export,
+resilient clipboard copying, and Open Graph social cards.
 """
 
 import json
@@ -72,11 +74,31 @@ def generate_dashboard_html(data: List[Dict[str, Any]], output_file: Path) -> Pa
     json_payload = json.dumps(data, indent=2)
 
     html_content = f"""<!DOCTYPE html>
-<html lang="fr" class="dark">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SafeOps-Bench : Leaderboard Déterministe & Frontière de Pareto</title>
+  <title>SafeOps-Bench : Deterministic SLM DevOps Benchmark & Pareto Frontier</title>
+  <meta name="description" content="Empirical evaluation of 12 SLMs (1B–3.8B) vs Workstations (7B–9B) on 50 real-world DevOps incidents. Certified on NVIDIA RTX 4090.">
+  <link rel="canonical" href="https://safeops.jalal.tech/">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+
+  <!-- Open Graph / LinkedIn / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="SafeOps-Bench">
+  <meta property="og:url" content="https://safeops.jalal.tech/">
+  <meta property="og:title" content="SafeOps-Bench : Deterministic SLM DevOps Benchmark">
+  <meta property="og:description" content="Empirical evaluation of 12 SLMs (1B–3.8B) vs Workstation models on 50 real-world DevOps incidents. Certified on 1x NVIDIA RTX 4090 24GB.">
+  <meta property="og:image" content="https://safeops.jalal.tech/assets/og-preview.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+
+  <!-- Twitter / X -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://safeops.jalal.tech/">
+  <meta name="twitter:title" content="SafeOps-Bench : Deterministic SLM DevOps Benchmark">
+  <meta name="twitter:description" content="Empirical evaluation of 12 SLMs (1B–3.8B) vs Workstation models on 50 real-world DevOps incidents. Certified on 1x NVIDIA RTX 4090 24GB.">
+  <meta name="twitter:image" content="https://safeops.jalal.tech/assets/og-preview.png">
   
   <!-- Fonts: Geist, Inter & Geist Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -126,6 +148,7 @@ def generate_dashboard_html(data: List[Dict[str, Any]], output_file: Path) -> Pa
     ::-webkit-scrollbar-thumb:hover {{ background: #3f3f46; }}
     ::selection {{ background: rgba(16, 185, 129, 0.2); color: #f4f4f5; }}
     .tabular-nums {{ font-variant-numeric: tabular-nums; }}
+    .ring-highlight {{ box-shadow: 0 0 0 2px #10b981; transition: box-shadow 0.3s ease; }}
   </style>
 </head>
 
@@ -133,29 +156,55 @@ def generate_dashboard_html(data: List[Dict[str, Any]], output_file: Path) -> Pa
 
   <!-- Top Navigation Bar -->
   <nav class="border-b border-zinc-800/80 bg-zinc-950/90 sticky top-0 z-30 backdrop-blur-md">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between gap-2">
+      
+      <!-- Brand & Version -->
       <div class="flex items-center gap-3">
-        <div class="w-7 h-7 rounded-md bg-zinc-900 border border-zinc-700/80 flex items-center justify-center text-emerald-400 font-mono text-sm font-bold">
+        <a href="https://safeops.jalal.tech/" class="w-7 h-7 rounded-md bg-zinc-900 border border-zinc-700/80 flex items-center justify-center text-emerald-400 font-mono text-sm font-bold hover:border-emerald-500/50 transition-colors">
           🛡️
-        </div>
+        </a>
         <div class="flex items-baseline gap-2">
-          <span class="font-semibold text-sm tracking-tight text-zinc-100">SafeOps-Bench</span>
+          <a href="https://safeops.jalal.tech/" class="font-semibold text-sm tracking-tight text-zinc-100 hover:text-emerald-400 transition-colors">SafeOps-Bench</a>
           <span class="text-[11px] font-mono text-zinc-500 px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800">v0.2.0-beta</span>
         </div>
       </div>
 
-      <div class="flex items-center gap-4 text-xs">
-        <div class="hidden sm:flex items-center gap-2 text-zinc-400">
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-          <span>Zero LLM-as-a-Judge</span>
-          <span class="text-zinc-600">•</span>
-          <span>Tree-sitter AST</span>
-          <span class="text-zinc-600">•</span>
-          <span>Linux Man-DB Oracle</span>
+      <!-- Trust Pillars (Mid-Screen) -->
+      <div class="hidden lg:flex items-center gap-2 text-xs text-zinc-400">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+        <span data-i18n="nav_zero_judge">Zero LLM-as-a-Judge</span>
+        <span class="text-zinc-600">•</span>
+        <span data-i18n="nav_tree_sitter">Tree-sitter AST</span>
+        <span class="text-zinc-600">•</span>
+        <span data-i18n="nav_man_oracle">Linux Man-DB Oracle</span>
+      </div>
+
+      <!-- Actions: Branding, GitHub, Language Switcher -->
+      <div class="flex items-center gap-2.5 text-xs">
+        
+        <!-- Personal Branding Link -->
+        <a href="https://jalal.tech" target="_blank" rel="noopener noreferrer" 
+           class="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 hover:border-emerald-400 transition-all font-medium text-[11px]">
+          <span data-i18n="nav_created_by">Created by Jalal</span>
+          <span class="text-[10px]">↗</span>
+        </a>
+
+        <!-- GitHub Repo Link -->
+        <a href="https://github.com/dimaland1/SafeOps-Bench" target="_blank" rel="noopener noreferrer"
+           class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-zinc-100 hover:border-zinc-700 transition-colors text-[11px] font-medium">
+          <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+          </svg>
+          <span class="hidden sm:inline" data-i18n="nav_github_code">Code & Tests</span>
+          <span class="text-[9px] font-mono px-1 py-0.2 rounded bg-zinc-800 text-zinc-400">Apache-2.0</span>
+        </a>
+
+        <!-- Bilingual Switcher [ EN | FR ] -->
+        <div class="inline-flex p-0.5 bg-zinc-900 border border-zinc-800 rounded text-[11px] font-mono">
+          <button onclick="setLanguage('en')" id="lang-btn-en" class="px-2 py-0.5 rounded font-semibold text-zinc-100 bg-zinc-800 transition-colors">EN</button>
+          <button onclick="setLanguage('fr')" id="lang-btn-fr" class="px-2 py-0.5 rounded font-medium text-zinc-400 hover:text-zinc-200 transition-colors">FR</button>
         </div>
-        <span class="px-2.5 py-1 rounded bg-zinc-900 border border-zinc-800 text-[11px] font-mono text-zinc-300">
-          100% Standalone (No-CORS)
-        </span>
+
       </div>
     </div>
   </nav>
@@ -165,39 +214,51 @@ def generate_dashboard_html(data: List[Dict[str, Any]], output_file: Path) -> Pa
     <!-- Executive Summary Strip -->
     <header class="space-y-4">
       <div>
-        <h1 class="text-2xl font-bold tracking-tight text-zinc-100">
-          Leaderboard & Diagnostic d'Efficience Matérielle
+        <h1 class="text-2xl font-bold tracking-tight text-zinc-100" data-i18n="hero_title">
+          Leaderboard & Hardware Efficiency Diagnostic
         </h1>
-        <p class="text-xs text-zinc-400 mt-1 max-w-3xl">
-          Évaluation déterministe de Small Language Models (1B–3.8B) vs Workstation (7B–9B) comme copilotes d'incident en lecture seule.
-          Audit de sûreté par sandbox isolée rootless (<code class="font-mono text-zinc-300">--read-only</code>, <code class="font-mono text-zinc-300">--net=none</code>, <code class="font-mono text-zinc-300">--tmpfs</code>).
+        <p class="text-xs text-zinc-400 mt-1 max-w-3xl leading-relaxed" data-i18n="hero_subtitle">
+          Deterministic evaluation of Small Language Models (1B–3.8B) vs Workstation (7B–9B) as read-only DevOps incident copilots.
+          Safety audit under rootless isolated sandbox (<code class="font-mono text-zinc-300">--read-only</code>, <code class="font-mono text-zinc-300">--net=none</code>, <code class="font-mono text-zinc-300">--tmpfs</code>).
         </p>
+      </div>
+
+      <!-- Hardware Provenance Status Banner -->
+      <div class="flex flex-wrap items-center gap-2">
+        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-zinc-800 bg-zinc-900/60 text-xs font-mono text-zinc-300">
+          <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span class="text-zinc-500 font-semibold uppercase tracking-wider text-[10px]" data-i18n="badge_hardware_label">Hardware Provenance:</span>
+          <span data-i18n="badge_hardware_val">1x NVIDIA RTX 4090 24GB • Ollama CUDA 12.8 • RunPod Reference Node</span>
+        </div>
+        <span class="px-2.5 py-1 rounded bg-zinc-900 border border-zinc-800 text-[11px] font-mono text-zinc-400" data-i18n="nav_standalone">
+          100% Standalone (No-CORS)
+        </span>
       </div>
 
       <!-- KPI Ribbon (Linear / Datadog style) -->
       <div class="grid grid-cols-2 md:grid-cols-5 bg-zinc-900/40 border border-zinc-800/80 rounded-lg divide-y md:divide-y-0 md:divide-x divide-zinc-800/80">
         <div class="p-4 space-y-1">
-          <div class="text-[11px] font-medium uppercase tracking-wider text-zinc-500">Étalon de Tête</div>
+          <div class="text-[11px] font-medium uppercase tracking-wider text-zinc-500" data-i18n="kpi_top_model">Top Benchmark</div>
           <div class="text-sm font-semibold text-zinc-100 font-mono truncate" id="kpi-top-model">—</div>
           <div class="text-[11px] text-emerald-400 font-mono" id="kpi-top-score">—</div>
         </div>
         <div class="p-4 space-y-1">
-          <div class="text-[11px] font-medium uppercase tracking-wider text-zinc-500">Sweet Spot RAM</div>
-          <div class="text-sm font-semibold text-zinc-100 font-mono">1.4 – 2.6 Go</div>
-          <div class="text-[11px] text-zinc-400">Plancher Micro-Edge ≤ 4 Go</div>
+          <div class="text-[11px] font-medium uppercase tracking-wider text-zinc-500" data-i18n="kpi_ram_sweetspot">RAM Sweet Spot</div>
+          <div class="text-sm font-semibold text-zinc-100 font-mono">1.1 – 2.5 GB</div>
+          <div class="text-[11px] text-zinc-400" data-i18n="kpi_ram_subtext">Micro-Edge Floor ≤ 4 GB</div>
         </div>
         <div class="p-4 space-y-1">
-          <div class="text-[11px] font-medium uppercase tracking-wider text-zinc-500">TTFT Médian Top</div>
+          <div class="text-[11px] font-medium uppercase tracking-wider text-zinc-500" data-i18n="kpi_top_ttft">Top Median TTFT</div>
           <div class="text-sm font-semibold text-zinc-100 font-mono" id="kpi-top-ttft">—</div>
-          <div class="text-[11px] text-zinc-400">Streaming réactif token 0</div>
+          <div class="text-[11px] text-zinc-400" data-i18n="kpi_ttft_subtext">Reactive token-0 streaming</div>
         </div>
         <div class="p-4 space-y-1">
-          <div class="text-[11px] font-medium uppercase tracking-wider text-zinc-500">Taux Zéro-Catastrophe</div>
+          <div class="text-[11px] font-medium uppercase tracking-wider text-zinc-500" data-i18n="kpi_safety_rate">Zero-Catastrophe Rate</div>
           <div class="text-sm font-semibold text-emerald-400 font-mono" id="kpi-safety-rate">100.0%</div>
-          <div class="text-[11px] text-zinc-400">Zero commande destructive</div>
+          <div class="text-[11px] text-zinc-400" data-i18n="kpi_safety_subtext">Zero destructive commands</div>
         </div>
         <div class="p-4 space-y-1 col-span-2 md:col-span-1">
-          <div class="text-[11px] font-medium uppercase tracking-wider text-zinc-500">Modèles Audités</div>
+          <div class="text-[11px] font-medium uppercase tracking-wider text-zinc-500" data-i18n="kpi_models_audited">Audited Models</div>
           <div class="text-sm font-semibold text-zinc-100 font-mono" id="kpi-total-models">{len(data)}</div>
           <div class="text-[11px] text-zinc-500 font-mono" id="kpi-divisions-count">—</div>
         </div>
@@ -207,16 +268,16 @@ def generate_dashboard_html(data: List[Dict[str, Any]], output_file: Path) -> Pa
     <!-- Visualizations: 2 Core Charts (Pareto Frontier + Latency/Precision) -->
     <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-      <!-- Chart 1: The Pareto Frontier (Core of Bench) -->
+      <!-- Chart 1: The Pareto Frontier -->
       <div class="bg-zinc-900/40 border border-zinc-800/80 rounded-lg p-5 space-y-3">
         <div class="flex items-start justify-between">
           <div>
             <h2 class="text-sm font-semibold text-zinc-100 flex items-center gap-2">
-              <span>La Frontière de Pareto</span>
-              <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Efficience Maximale</span>
+              <span data-i18n="chart1_title">The Pareto Frontier</span>
+              <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" data-i18n="chart1_tag">Max Efficiency</span>
             </h2>
-            <p class="text-xs text-zinc-400 mt-0.5">
-              SafeOps Index (Y) vs Pic Mémoire RAM en Go (X). Le tracé vert marque les modèles non-dominés.
+            <p class="text-xs text-zinc-400 mt-0.5" data-i18n="chart1_sub">
+              SafeOps Index (Y) vs Peak RAM in GB (X). The green curve marks non-dominated models.
             </p>
           </div>
         </div>
@@ -224,8 +285,8 @@ def generate_dashboard_html(data: List[Dict[str, Any]], output_file: Path) -> Pa
           <canvas id="efficiencyChart"></canvas>
         </div>
         <div class="pt-2 border-t border-zinc-800/60 flex items-center justify-between text-[11px] text-zinc-500 font-mono">
-          <span>• Seuil Bastion : 4.0 Go RAM</span>
-          <span>Pénalité mémoire : (4.0 / RAM_peak)^0.5</span>
+          <span data-i18n="chart1_note_left">• Bastion Threshold: 4.0 GB RAM</span>
+          <span data-i18n="chart1_note_right">Memory Penalty: (4.0 / RAM_peak)^0.5</span>
         </div>
       </div>
 
@@ -234,11 +295,11 @@ def generate_dashboard_html(data: List[Dict[str, Any]], output_file: Path) -> Pa
         <div class="flex items-start justify-between">
           <div>
             <h2 class="text-sm font-semibold text-zinc-100 flex items-center gap-2">
-              <span>Réactivité vs Précision Factuelle</span>
-              <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300 border border-zinc-700">TTFT (ms)</span>
+              <span data-i18n="chart2_title">Responsiveness vs Factual Precision</span>
+              <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300 border border-zinc-700" data-i18n="chart2_tag">TTFT (ms)</span>
             </h2>
-            <p class="text-xs text-zinc-400 mt-0.5">
-              Précision diagnostique (%) en fonction du délai de premier token streaming.
+            <p class="text-xs text-zinc-400 mt-0.5" data-i18n="chart2_sub">
+              Diagnostic precision (%) as a function of streaming first-token latency.
             </p>
           </div>
         </div>
@@ -246,31 +307,31 @@ def generate_dashboard_html(data: List[Dict[str, Any]], output_file: Path) -> Pa
           <canvas id="scatterChart"></canvas>
         </div>
         <div class="pt-2 border-t border-zinc-800/60 flex items-center justify-between text-[11px] text-zinc-500 font-mono">
-          <span>• Infobulle : survoler pour débit (tok/s)</span>
-          <span>Cible idéale : coin haut gauche (&lt;100 ms, 100%)</span>
+          <span data-i18n="chart2_note_left">• Tooltip: hover for throughput (tok/s)</span>
+          <span data-i18n="chart2_note_right">Ideal target: top-left corner (&lt;100 ms, 100%)</span>
         </div>
       </div>
 
     </section>
 
-    <!-- Multi-Axis Breakdown Strip (Replaces clunky radar with segmented horizontal bars) -->
+    <!-- Multi-Axis Breakdown Strip -->
     <section class="bg-zinc-900/40 border border-zinc-800/80 rounded-lg p-5 space-y-4">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-800/60 pb-3">
         <div>
           <h2 class="text-sm font-semibold text-zinc-100 flex items-center gap-2">
-            <span>Profil de Compétence par Axe DevOps</span>
-            <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400">4 Piliers</span>
+            <span data-i18n="axes_title">Competency Profile by DevOps Axis</span>
+            <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400" data-i18n="axes_tag">4 Pillars</span>
           </h2>
-          <p class="text-xs text-zinc-400 mt-0.5">
-            RCA (Diagnostic) • Blast Radius (Sûreté) • Surgical Diff (Non-régression) • Sanity Check (Dry-run).
+          <p class="text-xs text-zinc-400 mt-0.5" data-i18n="axes_sub">
+            RCA (Diagnostic) • Blast Radius (Safety) • Surgical Diff (Non-regression) • Sanity Check (Dry-run).
           </p>
         </div>
         <div class="flex items-center gap-2">
-          <span class="text-xs text-zinc-500">Afficher :</span>
+          <span class="text-xs text-zinc-500" data-i18n="axes_filter_label">Display:</span>
           <div class="inline-flex p-0.5 bg-zinc-950 border border-zinc-800 rounded text-xs" id="axes-filter-group">
-            <button onclick="updateAxesChart('top')" class="px-2.5 py-1 rounded text-zinc-200 font-medium bg-zinc-800 transition-colors" id="btn-axes-top">Top 4 Global</button>
-            <button onclick="updateAxesChart('micro')" class="px-2.5 py-1 rounded text-zinc-400 hover:text-zinc-200 transition-colors" id="btn-axes-micro">Micro-Edge</button>
-            <button onclick="updateAxesChart('workstation')" class="px-2.5 py-1 rounded text-zinc-400 hover:text-zinc-200 transition-colors" id="btn-axes-workstation">Workstation</button>
+            <button onclick="updateAxesChart('top')" class="px-2.5 py-1 rounded text-zinc-200 font-medium bg-zinc-800 transition-colors" id="btn-axes-top" data-i18n="axes_btn_top">Top 4 Global</button>
+            <button onclick="updateAxesChart('micro')" class="px-2.5 py-1 rounded text-zinc-400 hover:text-zinc-200 transition-colors" id="btn-axes-micro" data-i18n="axes_btn_micro">Micro-Edge</button>
+            <button onclick="updateAxesChart('workstation')" class="px-2.5 py-1 rounded text-zinc-400 hover:text-zinc-200 transition-colors" id="btn-axes-workstation" data-i18n="axes_btn_workstation">Workstation</button>
           </div>
         </div>
       </div>
@@ -280,14 +341,14 @@ def generate_dashboard_html(data: List[Dict[str, Any]], output_file: Path) -> Pa
       </div>
     </section>
 
-    <!-- High-Density Leaderboard Table (Hugging Face / LMSYS / Vercel style) -->
+    <!-- High-Density Leaderboard Table -->
     <section class="bg-zinc-900/40 border border-zinc-800/80 rounded-lg p-5 space-y-4">
       
-      <!-- Toolbar: Search & Division Filters -->
+      <!-- Toolbar: Search & Division Filters & Export Button -->
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div class="flex items-center gap-2">
-          <span class="text-sm font-semibold text-zinc-100">Classement Officiel</span>
-          <span class="text-[11px] font-mono text-zinc-500" id="filtered-count-label">({len(data)} modèles)</span>
+          <span class="text-sm font-semibold text-zinc-100" data-i18n="table_title">Official Leaderboard</span>
+          <span class="text-[11px] font-mono text-zinc-500" id="filtered-count-label">({len(data)} models)</span>
         </div>
 
         <div class="flex flex-wrap items-center gap-3">
@@ -296,18 +357,29 @@ def generate_dashboard_html(data: List[Dict[str, Any]], output_file: Path) -> Pa
             <input 
               type="text" 
               id="model-search" 
-              placeholder="Filtrer par nom..." 
+              placeholder="Filter by name..." 
+              data-i18n-ph="table_search_ph"
               oninput="onSearchInput(this.value)"
-              class="w-48 sm:w-64 bg-zinc-950 border border-zinc-800 text-xs px-3 py-1.5 rounded text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-zinc-600 font-mono transition-colors"
+              class="w-44 sm:w-56 bg-zinc-950 border border-zinc-800 text-xs px-3 py-1.5 rounded text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-zinc-600 font-mono transition-colors"
             />
           </div>
 
           <!-- Division Filter Pills -->
           <div class="inline-flex p-0.5 bg-zinc-950 border border-zinc-800 rounded text-xs">
-            <button onclick="setDivisionFilter('ALL')" id="tab-all" class="px-3 py-1 rounded font-medium text-zinc-100 bg-zinc-800 transition-colors">Tous</button>
-            <button onclick="setDivisionFilter('Micro-Edge')" id="tab-micro" class="px-3 py-1 rounded font-medium text-zinc-400 hover:text-zinc-200 transition-colors">Micro-Edge (≤4B)</button>
-            <button onclick="setDivisionFilter('Workstation')" id="tab-workstation" class="px-3 py-1 rounded font-medium text-zinc-400 hover:text-zinc-200 transition-colors">Workstation (7B–9B)</button>
+            <button onclick="setDivisionFilter('ALL')" id="tab-all" class="px-3 py-1 rounded font-medium text-zinc-100 bg-zinc-800 transition-colors" data-i18n="tab_all">All</button>
+            <button onclick="setDivisionFilter('Micro-Edge')" id="tab-micro" class="px-3 py-1 rounded font-medium text-zinc-400 hover:text-zinc-200 transition-colors" data-i18n="tab_micro">Micro-Edge (≤4B)</button>
+            <button onclick="setDivisionFilter('Workstation')" id="tab-workstation" class="px-3 py-1 rounded font-medium text-zinc-400 hover:text-zinc-200 transition-colors" data-i18n="tab_workstation">Workstation (7B–9B)</button>
           </div>
+
+          <!-- Open Data Export Button -->
+          <button onclick="exportTelemetryJSON()" 
+                  class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-zinc-900 border border-zinc-800 hover:border-emerald-500/50 hover:text-emerald-400 text-zinc-300 font-mono text-xs transition-colors"
+                  title="Download full benchmark JSON dataset">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+            </svg>
+            <span data-i18n="btn_export_json">Export Telemetry JSON ↓</span>
+          </button>
         </div>
       </div>
 
@@ -316,17 +388,17 @@ def generate_dashboard_html(data: List[Dict[str, Any]], output_file: Path) -> Pa
         <table class="w-full text-left text-xs border-collapse">
           <thead>
             <tr class="bg-zinc-900/90 border-b border-zinc-800 text-zinc-400 font-medium uppercase tracking-wider select-none text-[11px]">
-              <th onclick="sortBy('rank')" class="py-2.5 px-3 cursor-pointer hover:text-zinc-200 transition-colors w-12">#</th>
-              <th onclick="sortBy('model_id')" class="py-2.5 px-3 cursor-pointer hover:text-zinc-200 transition-colors">Modèle <span class="sort-icon" id="sort-model_id"></span></th>
-              <th onclick="sortBy('division')" class="py-2.5 px-3 cursor-pointer hover:text-zinc-200 transition-colors">Division <span class="sort-icon" id="sort-division"></span></th>
-              <th onclick="sortBy('safeops_index')" class="py-2.5 px-3 cursor-pointer hover:text-zinc-200 transition-colors text-right">SafeOps Index <span class="sort-icon text-emerald-400" id="sort-safeops_index">↓</span></th>
-              <th onclick="sortBy('factual_precision')" class="py-2.5 px-3 cursor-pointer hover:text-zinc-200 transition-colors text-right">Précision <span class="sort-icon" id="sort-factual_precision"></span></th>
-              <th onclick="sortBy('safety_score')" class="py-2.5 px-3 cursor-pointer hover:text-zinc-200 transition-colors text-right">Sûreté <span class="sort-icon" id="sort-safety_score"></span></th>
-              <th onclick="sortBy('hallucination_rate_per_1k_tokens')" class="py-2.5 px-3 cursor-pointer hover:text-zinc-200 transition-colors text-right">Halluc./1k <span class="sort-icon" id="sort-hallucination_rate_per_1k_tokens"></span></th>
-              <th onclick="sortBy('peak_rss_gb')" class="py-2.5 px-3 cursor-pointer hover:text-zinc-200 transition-colors text-right">Pic RAM <span class="sort-icon" id="sort-peak_rss_gb"></span></th>
-              <th onclick="sortBy('median_ttft_ms')" class="py-2.5 px-3 cursor-pointer hover:text-zinc-200 transition-colors text-right">TTFT <span class="sort-icon" id="sort-median_ttft_ms"></span></th>
-              <th onclick="sortBy('avg_throughput_tok_per_sec')" class="py-2.5 px-3 cursor-pointer hover:text-zinc-200 transition-colors text-right">Débit <span class="sort-icon" id="sort-avg_throughput_tok_per_sec"></span></th>
-              <th class="py-2.5 px-3 text-center w-10">Détail</th>
+              <th onclick="sortBy('rank')" class="py-2.5 px-3 cursor-pointer hover:text-zinc-200 transition-colors w-12" data-i18n="th_rank">#</th>
+              <th onclick="sortBy('model_id')" class="py-2.5 px-3 cursor-pointer hover:text-zinc-200 transition-colors"><span data-i18n="th_model">Model</span> <span class="sort-icon" id="sort-model_id"></span></th>
+              <th onclick="sortBy('division')" class="py-2.5 px-3 cursor-pointer hover:text-zinc-200 transition-colors"><span data-i18n="th_division">Division</span> <span class="sort-icon" id="sort-division"></span></th>
+              <th onclick="sortBy('safeops_index')" class="py-2.5 px-3 cursor-pointer hover:text-zinc-200 transition-colors text-right"><span data-i18n="th_index">SafeOps Index</span> <span class="sort-icon text-emerald-400" id="sort-safeops_index">↓</span></th>
+              <th onclick="sortBy('factual_precision')" class="py-2.5 px-3 cursor-pointer hover:text-zinc-200 transition-colors text-right"><span data-i18n="th_precision">Precision</span> <span class="sort-icon" id="sort-factual_precision"></span></th>
+              <th onclick="sortBy('safety_score')" class="py-2.5 px-3 cursor-pointer hover:text-zinc-200 transition-colors text-right"><span data-i18n="th_safety">Safety</span> <span class="sort-icon" id="sort-safety_score"></span></th>
+              <th onclick="sortBy('hallucination_rate_per_1k_tokens')" class="py-2.5 px-3 cursor-pointer hover:text-zinc-200 transition-colors text-right"><span data-i18n="th_halluc">Halluc./1k</span> <span class="sort-icon" id="sort-hallucination_rate_per_1k_tokens"></span></th>
+              <th onclick="sortBy('peak_rss_gb')" class="py-2.5 px-3 cursor-pointer hover:text-zinc-200 transition-colors text-right"><span data-i18n="th_ram">Peak RAM</span> <span class="sort-icon" id="sort-peak_rss_gb"></span></th>
+              <th onclick="sortBy('median_ttft_ms')" class="py-2.5 px-3 cursor-pointer hover:text-zinc-200 transition-colors text-right"><span data-i18n="th_ttft">TTFT</span> <span class="sort-icon" id="sort-median_ttft_ms"></span></th>
+              <th onclick="sortBy('avg_throughput_tok_per_sec')" class="py-2.5 px-3 cursor-pointer hover:text-zinc-200 transition-colors text-right"><span data-i18n="th_throughput">Throughput</span> <span class="sort-icon" id="sort-avg_throughput_tok_per_sec"></span></th>
+              <th class="py-2.5 px-3 text-center w-16" data-i18n="th_detail">Detail</th>
             </tr>
           </thead>
           <tbody id="table-body" class="divide-y divide-zinc-800/60 font-mono text-xs">
@@ -335,9 +407,9 @@ def generate_dashboard_html(data: List[Dict[str, Any]], output_file: Path) -> Pa
         </table>
       </div>
 
-      <div class="text-[11px] text-zinc-500 flex items-center justify-between">
-        <span>Cliquez sur une ligne pour inspecter la décomposition multi-axes, l'audit des drapeaux et les traces.</span>
-        <span>Tri interactif sur toutes les colonnes</span>
+      <div class="text-[11px] text-zinc-500 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1">
+        <span data-i18n="table_tip_click">Click any row to inspect multi-axis breakdown, flags audit, and traces.</span>
+        <span data-i18n="table_tip_sort">Interactive sorting on all columns • 🔗 to copy recruiter link</span>
       </div>
     </section>
 
@@ -345,10 +417,14 @@ def generate_dashboard_html(data: List[Dict[str, Any]], output_file: Path) -> Pa
     <footer class="border-t border-zinc-800/80 pt-6 pb-12 text-xs text-zinc-500 flex flex-col sm:flex-row items-center justify-between gap-4">
       <div class="flex items-center gap-2">
         <span class="font-semibold text-zinc-300">SafeOps-Bench</span>
-        <span>• Déterministe • Open Source • Conçu pour l'inférence edge & bastion</span>
+        <span data-i18n="footer_desc">• Deterministic • Open Source • Engineered for edge & bastion inference</span>
       </div>
-      <div>
-        Évaluation automatisée certifiée sans LLM-as-a-Judge.
+      <div class="flex items-center gap-3">
+        <a href="https://jalal.tech" target="_blank" rel="noopener noreferrer" class="hover:text-emerald-400 transition-colors" data-i18n="footer_author">
+          Architected by Jalal Azouzout — AI Platform Engineer
+        </a>
+        <span class="text-zinc-700">•</span>
+        <span data-i18n="footer_sub">Automated evaluation certified without LLM-as-a-Judge.</span>
       </div>
     </footer>
 
@@ -358,8 +434,219 @@ def generate_dashboard_html(data: List[Dict[str, Any]], output_file: Path) -> Pa
   <script>
     window.BENCH_DATA = {json_payload};
 
+    // Bilingual dictionary (EN default, FR toggle)
+    const I18N = {{
+      en: {{
+        nav_zero_judge: "Zero LLM-as-a-Judge",
+        nav_tree_sitter: "Tree-sitter AST",
+        nav_man_oracle: "Linux Man-DB Oracle",
+        nav_standalone: "100% Standalone (No-CORS)",
+        nav_created_by: "Created by Jalal",
+        nav_github_code: "Code & Tests",
+        
+        hero_title: "Leaderboard & Hardware Efficiency Diagnostic",
+        hero_subtitle: "Deterministic evaluation of Small Language Models (1B–3.8B) vs Workstation (7B–9B) as read-only DevOps incident copilots. Safety audit under rootless isolated sandbox (--read-only, --net=none, --tmpfs).",
+        badge_hardware_label: "Hardware Provenance:",
+        badge_hardware_val: "1x NVIDIA RTX 4090 24GB • Ollama CUDA 12.8 • RunPod Reference Node",
+        
+        kpi_top_model: "Top Benchmark",
+        kpi_ram_sweetspot: "RAM Sweet Spot",
+        kpi_ram_subtext: "Micro-Edge Floor ≤ 4 GB",
+        kpi_top_ttft: "Top Median TTFT",
+        kpi_ttft_subtext: "Reactive token-0 streaming",
+        kpi_safety_rate: "Zero-Catastrophe Rate",
+        kpi_safety_subtext: "Zero destructive commands",
+        kpi_models_audited: "Audited Models",
+        
+        chart1_title: "The Pareto Frontier",
+        chart1_tag: "Max Efficiency",
+        chart1_sub: "SafeOps Index (Y) vs Peak RAM in GB (X). The green curve marks non-dominated models.",
+        chart1_note_left: "• Bastion Threshold: 4.0 GB RAM",
+        chart1_note_right: "Memory Penalty: (4.0 / RAM_peak)^0.5",
+        chart1_axis_x: "Peak Memory RSS (GB)",
+        chart1_axis_y: "SafeOps Index",
+        chart1_pareto_label: "Efficiency Frontier (Pareto)",
+        chart1_div_a: "Division A: Micro-Edge (≤ 4 GB)",
+        chart1_div_b: "Division B: Workstation (7B–9B)",
+        
+        chart2_title: "Responsiveness vs Factual Precision",
+        chart2_tag: "TTFT (ms)",
+        chart2_sub: "Diagnostic precision (%) as a function of streaming first-token latency.",
+        chart2_note_left: "• Tooltip: hover for throughput (tok/s)",
+        chart2_note_right: "Ideal target: top-left corner (<100 ms, 100%)",
+        chart2_axis_x: "Median TTFT (ms)",
+        chart2_axis_y: "Factual Precision (%)",
+        
+        axes_title: "Competency Profile by DevOps Axis",
+        axes_tag: "4 Pillars",
+        axes_sub: "RCA (Diagnostic) • Blast Radius (Safety) • Surgical Diff (Non-regression) • Sanity Check (Dry-run).",
+        axes_filter_label: "Display:",
+        axes_btn_top: "Top 4 Global",
+        axes_btn_micro: "Micro-Edge",
+        axes_btn_workstation: "Workstation",
+        
+        table_title: "Official Leaderboard",
+        table_search_ph: "Filter by name...",
+        tab_all: "All",
+        tab_micro: "Micro-Edge (≤4B)",
+        tab_workstation: "Workstation (7B–9B)",
+        btn_export_json: "Export Telemetry JSON ↓",
+        
+        th_rank: "#",
+        th_model: "Model",
+        th_division: "Division",
+        th_index: "SafeOps Index",
+        th_precision: "Precision",
+        th_safety: "Safety",
+        th_halluc: "Halluc./1k",
+        th_ram: "Peak RAM",
+        th_ttft: "TTFT",
+        th_throughput: "Throughput",
+        th_detail: "Detail",
+        
+        table_tip_click: "Click any row to inspect multi-axis breakdown, flags audit, and traces.",
+        table_tip_sort: "Interactive sorting on all columns • 🔗 to copy recruiter link",
+        
+        col_breakdown: "4-Axes Score Breakdown",
+        col_ast_audit: "AST Audit & Flags Validation",
+        col_hardware_footprint: "Real Hardware Footprint",
+        
+        axis_rca: "RCA (Diagnostic)",
+        axis_blast: "Blast Radius (Safety)",
+        axis_diff: "Surgical Diff (Config)",
+        axis_sanity: "Sanity Check (Dry-run)",
+        
+        ast_halluc_rate: "Hallucination rate:",
+        ast_invented_flags: "Invented flags:",
+        ast_sandbox_status: "Sandbox Confinement:",
+        ast_sandbox_val: "Certified rootless --net=none",
+        ast_zero_flags: "0 (Perfect)",
+        ast_penalty: "Penalty applied",
+        
+        hw_peak_rss: "PEAK RSS / VRAM",
+        hw_throughput: "STREAMING THROUGHPUT",
+        hw_ttft: "TIME TO FIRST TOKEN",
+        hw_tokens: "GENERATED TOKENS",
+        hw_footnote: "*Measured via psutil Process Tree + VRAM API /api/ps.",
+        
+        audit_cert_clean: "Certified audit: Zero crash, isolated sandbox confinement.",
+        lbl_diagnostic: "Diagnostic:",
+        lbl_think_trace: "<think> trace:",
+        lbl_cmd_generated: "Generated command:",
+        link_copied: "Link copied!",
+        
+        footer_desc: "• Deterministic • Open Source • Engineered for edge & bastion inference",
+        footer_author: "Architected by Jalal Azouzout — AI Platform Engineer",
+        footer_sub: "Automated evaluation certified without LLM-as-a-Judge."
+      }},
+      fr: {{
+        nav_zero_judge: "Zéro LLM-as-a-Judge",
+        nav_tree_sitter: "AST Tree-sitter",
+        nav_man_oracle: "Oracle Linux Man-DB",
+        nav_standalone: "100% Autonome (Sans-CORS)",
+        nav_created_by: "Créé par Jalal",
+        nav_github_code: "Code & Tests",
+        
+        hero_title: "Leaderboard & Diagnostic d'Efficience Matérielle",
+        hero_subtitle: "Évaluation déterministe de Small Language Models (1B–3.8B) vs Workstation (7B–9B) comme copilotes d'incident en lecture seule. Audit de sûreté par sandbox isolée rootless (--read-only, --net=none, --tmpfs).",
+        badge_hardware_label: "Provenance Matérielle :",
+        badge_hardware_val: "1x NVIDIA RTX 4090 24Go • Ollama CUDA 12.8 • Node de Référence RunPod",
+        
+        kpi_top_model: "Étalon de Tête",
+        kpi_ram_sweetspot: "Sweet Spot RAM",
+        kpi_ram_subtext: "Plancher Micro-Edge ≤ 4 Go",
+        kpi_top_ttft: "TTFT Médian Top",
+        kpi_ttft_subtext: "Streaming réactif token 0",
+        kpi_safety_rate: "Taux Zéro-Catastrophe",
+        kpi_safety_subtext: "Zéro commande destructive",
+        kpi_models_audited: "Modèles Audités",
+        
+        chart1_title: "La Frontière de Pareto",
+        chart1_tag: "Efficience Maximale",
+        chart1_sub: "SafeOps Index (Y) vs Pic Mémoire RAM en Go (X). Le tracé vert marque les modèles non-dominés.",
+        chart1_note_left: "• Seuil Bastion : 4.0 Go RAM",
+        chart1_note_right: "Pénalité mémoire : (4.0 / RAM_peak)^0.5",
+        chart1_axis_x: "Pic RAM Réel (Go)",
+        chart1_axis_y: "SafeOps Index",
+        chart1_pareto_label: "Frontière d'Efficience (Pareto)",
+        chart1_div_a: "Division A : Micro-Edge (≤ 4 Go)",
+        chart1_div_b: "Division B : Workstation (7B–9B)",
+        
+        chart2_title: "Réactivité vs Précision Factuelle",
+        chart2_tag: "TTFT (ms)",
+        chart2_sub: "Précision diagnostique (%) en fonction du délai de premier token streaming.",
+        chart2_note_left: "• Infobulle : survoler pour débit (tok/s)",
+        chart2_note_right: "Cible idéale : coin haut gauche (<100 ms, 100%)",
+        chart2_axis_x: "TTFT Médian (ms)",
+        chart2_axis_y: "Précision Factuelle (%)",
+        
+        axes_title: "Profil de Compétence par Axe DevOps",
+        axes_tag: "4 Piliers",
+        axes_sub: "RCA (Diagnostic) • Blast Radius (Sûreté) • Surgical Diff (Non-régression) • Sanity Check (Dry-run).",
+        axes_filter_label: "Afficher :",
+        axes_btn_top: "Top 4 Global",
+        axes_btn_micro: "Micro-Edge",
+        axes_btn_workstation: "Workstation",
+        
+        table_title: "Classement Officiel",
+        table_search_ph: "Filtrer par nom...",
+        tab_all: "Tous",
+        tab_micro: "Micro-Edge (≤4B)",
+        tab_workstation: "Workstation (7B–9B)",
+        btn_export_json: "Exporter Télémétrie JSON ↓",
+        
+        th_rank: "#",
+        th_model: "Modèle",
+        th_division: "Division",
+        th_index: "SafeOps Index",
+        th_precision: "Précision",
+        th_safety: "Sûreté",
+        th_halluc: "Halluc./1k",
+        th_ram: "Pic RAM",
+        th_ttft: "TTFT",
+        th_throughput: "Débit",
+        th_detail: "Détail",
+        
+        table_tip_click: "Cliquez sur une ligne pour inspecter la décomposition multi-axes, l'audit des drapeaux et les traces.",
+        table_tip_sort: "Tri interactif sur toutes les colonnes • 🔗 pour copier le lien recruteur",
+        
+        col_breakdown: "Décomposition des 4 Axes",
+        col_ast_audit: "Audit AST & Validation Drapeaux",
+        col_hardware_footprint: "Empreinte Matérielle Réelle",
+        
+        axis_rca: "RCA (Diagnostic)",
+        axis_blast: "Blast Radius (Sûreté)",
+        axis_diff: "Surgical Diff (Config)",
+        axis_sanity: "Sanity Check (Dry-run)",
+        
+        ast_halluc_rate: "Taux d'hallucination :",
+        ast_invented_flags: "Drapeaux inventés :",
+        ast_sandbox_status: "Confinement Sandbox :",
+        ast_sandbox_val: "Certifié rootless --net=none",
+        ast_zero_flags: "0 (Parfait)",
+        ast_penalty: "Pénalité appliquée",
+        
+        hw_peak_rss: "PIC RSS / VRAM",
+        hw_throughput: "DÉBIT STREAMING",
+        hw_ttft: "TIME TO FIRST TOKEN",
+        hw_tokens: "TOKENS GÉNÉRÉS",
+        hw_footnote: "*Mesuré via psutil Process Tree + API VRAM /api/ps.",
+        
+        audit_cert_clean: "Audit certifié conforme : Zéro crash, confinement sandbox étanche.",
+        lbl_diagnostic: "Diagnostic :",
+        lbl_think_trace: "Trace <think> :",
+        lbl_cmd_generated: "Commande générée :",
+        link_copied: "Lien copié !",
+        
+        footer_desc: "• Déterministe • Open Source • Conçu pour l'inférence edge & bastion",
+        footer_author: "Architecturé par Jalal Azouzout — AI Platform Engineer",
+        footer_sub: "Évaluation automatisée certifiée sans LLM-as-a-Judge."
+      }}
+    }};
+
     // Global UI state
     let state = {{
+      currentLang: localStorage.getItem('safeops_lang') || 'en',
       sortCol: 'safeops_index',
       sortAsc: false,
       divisionFilter: 'ALL',
@@ -370,6 +657,104 @@ def generate_dashboard_html(data: List[Dict[str, Any]], output_file: Path) -> Pa
     let efficiencyChartInstance = null;
     let scatterChartInstance = null;
     let axesChartInstance = null;
+
+    // Sanitize model id for DOM usage
+    function sanitizeId(id) {{
+      return String(id).replace(/[^a-zA-Z0-9_-]/g, '_');
+    }}
+
+    // Internationalization logic
+    function setLanguage(lang) {{
+      if (!I18N[lang]) lang = 'en';
+      state.currentLang = lang;
+      localStorage.setItem('safeops_lang', lang);
+      document.documentElement.lang = lang;
+
+      // Update button styling
+      const btnEn = document.getElementById("lang-btn-en");
+      const btnFr = document.getElementById("lang-btn-fr");
+      if (btnEn && btnFr) {{
+        if (lang === 'en') {{
+          btnEn.className = "px-2 py-0.5 rounded font-semibold text-zinc-100 bg-zinc-800 transition-colors";
+          btnFr.className = "px-2 py-0.5 rounded font-medium text-zinc-400 hover:text-zinc-200 transition-colors";
+        }} else {{
+          btnEn.className = "px-2 py-0.5 rounded font-medium text-zinc-400 hover:text-zinc-200 transition-colors";
+          btnFr.className = "px-2 py-0.5 rounded font-semibold text-zinc-100 bg-zinc-800 transition-colors";
+        }}
+      }}
+
+      // Translate all data-i18n elements
+      const dict = I18N[lang];
+      document.querySelectorAll("[data-i18n]").forEach(el => {{
+        const key = el.getAttribute("data-i18n");
+        if (dict[key]) el.textContent = dict[key];
+      }});
+
+      // Translate placeholders
+      document.querySelectorAll("[data-i18n-ph]").forEach(el => {{
+        const key = el.getAttribute("data-i18n-ph");
+        if (dict[key]) el.setAttribute("placeholder", dict[key]);
+      }});
+
+      // Re-render table and charts with new language strings
+      renderTable();
+      initEfficiencyChart();
+      initScatterChart();
+      updateAxesChart(state.axesSelection);
+    }}
+
+    // Clipboard copy with robust fallback for file:/// and insecure origins
+    function copyModelLink(modelId, btnElement) {{
+      const safeId = sanitizeId(modelId);
+      const url = `${{window.location.origin}}${{window.location.pathname}}#model=${{encodeURIComponent(modelId)}}`;
+      
+      function onSuccess() {{
+        const originalText = btnElement.innerHTML;
+        btnElement.innerHTML = '✓';
+        btnElement.classList.add('text-emerald-400');
+        setTimeout(() => {{
+          btnElement.innerHTML = originalText;
+          btnElement.classList.remove('text-emerald-400');
+        }}, 1500);
+      }}
+
+      if (navigator.clipboard && window.isSecureContext) {{
+        navigator.clipboard.writeText(url).then(onSuccess).catch(() => fallbackCopy(url, onSuccess));
+      }} else {{
+        fallbackCopy(url, onSuccess);
+      }}
+    }}
+
+    function fallbackCopy(text, cb) {{
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.position = "fixed";
+      textArea.style.left = "-999999px";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      try {{
+        document.execCommand('copy');
+        if (cb) cb();
+      }} catch (err) {{
+        console.error('Fallback copy failed', err);
+      }}
+      document.body.removeChild(textArea);
+    }}
+
+    // Open Data Export
+    function exportTelemetryJSON() {{
+      const dataStr = JSON.stringify(window.BENCH_DATA, null, 2);
+      const blob = new Blob([dataStr], {{ type: "application/json" }});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "safeops-bench-telemetry.json";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }}
 
     // Pareto frontier mathematical calculation
     function getParetoFrontier(models) {{
@@ -431,9 +816,13 @@ def generate_dashboard_html(data: List[Dict[str, Any]], output_file: Path) -> Pa
     function renderTable() {{
       const tbody = document.getElementById("table-body");
       tbody.innerHTML = "";
+      const dict = I18N[state.currentLang];
 
       const filtered = getFilteredData();
-      document.getElementById("filtered-count-label").textContent = `(${{filtered.length}} modèles)`;
+      const countLabel = state.currentLang === 'fr' 
+        ? `(${{filtered.length}} modèles)` 
+        : `(${{filtered.length}} models)`;
+      document.getElementById("filtered-count-label").textContent = countLabel;
 
       // Update sort icons in table headers
       const cols = ['model_id', 'division', 'safeops_index', 'factual_precision', 'safety_score', 'hallucination_rate_per_1k_tokens', 'peak_rss_gb', 'median_ttft_ms', 'avg_throughput_tok_per_sec'];
@@ -451,6 +840,7 @@ def generate_dashboard_html(data: List[Dict[str, Any]], output_file: Path) -> Pa
       }});
 
       filtered.forEach((m, idx) => {{
+        const safeId = sanitizeId(m.model_id);
         const isMicro = m.division === 'Micro-Edge';
         const divBadge = isMicro
           ? '<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-sans font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"><span class="w-1 h-1 rounded-full bg-emerald-400"></span>Micro-Edge</span>'
@@ -461,20 +851,34 @@ def generate_dashboard_html(data: List[Dict[str, Any]], output_file: Path) -> Pa
           : (m.safeops_index >= 60 ? 'text-zinc-200 font-semibold' : 'text-zinc-400 font-normal');
 
         const ramWarning = m.peak_rss_gb > 4.0
-          ? `<span class="text-rose-400">${{m.peak_rss_gb}} Go</span>`
-          : `<span class="text-zinc-300">${{m.peak_rss_gb}} Go</span>`;
+          ? `<span class="text-rose-400">${{m.peak_rss_gb}} GB</span>`
+          : `<span class="text-zinc-300">${{m.peak_rss_gb}} GB</span>`;
 
         const hallucColor = m.hallucination_rate_per_1k_tokens > 2.0
           ? 'text-rose-400'
           : (m.hallucination_rate_per_1k_tokens > 0 ? 'text-amber-400' : 'text-emerald-400');
 
         const tr = document.createElement("tr");
+        tr.id = `row-${{safeId}}`;
         tr.className = "hover:bg-zinc-900/60 transition-colors cursor-pointer group";
-        tr.onclick = () => toggleRow(idx);
+        tr.onclick = (e) => {{
+          // Don't toggle if user clicked copy button
+          if (e.target.closest('.btn-copy-link')) return;
+          toggleRow(safeId);
+        }};
 
         tr.innerHTML = `
           <td class="py-2.5 px-3 text-zinc-500 font-sans tabular-nums">${{idx + 1}}</td>
-          <td class="py-2.5 px-3 text-zinc-100 font-medium group-hover:text-emerald-400 transition-colors">${{m.model_id}}</td>
+          <td class="py-2.5 px-3 text-zinc-100 font-medium group-hover:text-emerald-400 transition-colors">
+            <div class="flex items-center gap-1.5">
+              <span>${{m.model_id}}</span>
+              <button onclick="copyModelLink('${{m.model_id}}', this)" 
+                      class="btn-copy-link p-1 text-zinc-600 hover:text-emerald-400 transition-colors rounded hover:bg-zinc-800 text-[11px]" 
+                      title="Copy recruiter direct link">
+                🔗
+              </button>
+            </div>
+          </td>
           <td class="py-2.5 px-3">${{divBadge}}</td>
           <td class="py-2.5 px-3 text-right tabular-nums ${{scoreColor}}">${{Number(m.safeops_index).toFixed(1)}}</td>
           <td class="py-2.5 px-3 text-right tabular-nums text-zinc-300">${{Number(m.factual_precision).toFixed(1)}}%</td>
@@ -484,14 +888,14 @@ def generate_dashboard_html(data: List[Dict[str, Any]], output_file: Path) -> Pa
           <td class="py-2.5 px-3 text-right tabular-nums text-zinc-400">${{Number(m.median_ttft_ms).toFixed(1)}} ms</td>
           <td class="py-2.5 px-3 text-right tabular-nums text-zinc-300">${{Number(m.avg_throughput_tok_per_sec).toFixed(1)}}</td>
           <td class="py-2.5 px-3 text-center text-zinc-500">
-            <span id="chevron-${{idx}}" class="inline-block transition-transform duration-150 text-[10px]">▼</span>
+            <span id="chevron-${{safeId}}" class="inline-block transition-transform duration-150 text-[10px]">▼</span>
           </td>
         `;
         tbody.appendChild(tr);
 
         // Accordion Inspection Sub-Row
         const detailTr = document.createElement("tr");
-        detailTr.id = `detail-${{idx}}`;
+        detailTr.id = `detail-${{safeId}}`;
         detailTr.className = "hidden bg-zinc-900/70 border-b border-zinc-800";
 
         // Extract subscores safely
@@ -506,18 +910,20 @@ def generate_dashboard_html(data: List[Dict[str, Any]], output_file: Path) -> Pa
           const cr = m.case_results[0];
           caseDetailsHtml = `
             <div class="mt-2 text-[11px] font-mono p-2.5 bg-zinc-950/80 border border-zinc-800 rounded space-y-1">
-              <div class="text-zinc-400"><span class="text-zinc-500">Diagnostic :</span> ${{cr.details || 'N/A'}}</div>
-              ${{cr.thinking_content ? `<div class="mt-2 text-zinc-400"><span class="text-zinc-500">&lt;think&gt; trace :</span><pre class="mt-1 text-[10px] text-zinc-300 max-h-24 overflow-y-auto whitespace-pre-wrap">${{cr.thinking_content}}</pre></div>` : ''}}
-              ${{cr.raw_payload ? `<div class="mt-2 text-zinc-400"><span class="text-zinc-500">Commande générée :</span><pre class="mt-1 text-[10px] text-emerald-400 max-h-24 overflow-y-auto whitespace-pre-wrap">${{cr.raw_payload}}</pre></div>` : ''}}
+              <div class="text-zinc-400"><span class="text-zinc-500">${{dict.lbl_diagnostic}}</span> ${{cr.details || 'N/A'}}</div>
+              ${{cr.thinking_content ? `<div class="mt-2 text-zinc-400"><span class="text-zinc-500">${{dict.lbl_think_trace}}</span><pre class="mt-1 text-[10px] text-zinc-300 max-h-24 overflow-y-auto whitespace-pre-wrap">${{cr.thinking_content}}</pre></div>` : ''}}
+              ${{cr.raw_payload ? `<div class="mt-2 text-zinc-400"><span class="text-zinc-500">${{dict.lbl_cmd_generated}}</span><pre class="mt-1 text-[10px] text-emerald-400 max-h-24 overflow-y-auto whitespace-pre-wrap">${{cr.raw_payload}}</pre></div>` : ''}}
             </div>
           `;
         }} else {{
           caseDetailsHtml = `
             <div class="mt-2 text-[11px] text-zinc-500 font-mono">
-              Audit certifié conforme : Zero crash, confinement sandbox étanche.
+              ${{dict.audit_cert_clean}}
             </div>
           `;
         }}
+
+        const zeroFlagText = m.hallucination_rate_per_1k_tokens == 0 ? dict.ast_zero_flags : dict.ast_penalty;
 
         detailTr.innerHTML = `
           <td colspan="11" class="p-4 md:p-5">
@@ -526,13 +932,13 @@ def generate_dashboard_html(data: List[Dict[str, Any]], output_file: Path) -> Pa
               <!-- Column 1: Multi-Axis Score Breakdown -->
               <div class="bg-zinc-950/80 border border-zinc-800 rounded p-3.5 space-y-2.5">
                 <div class="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 flex items-center justify-between">
-                  <span>Décomposition des 4 Axes</span>
+                  <span>${{dict.col_breakdown}}</span>
                   <span class="text-emerald-400 font-mono">${{m.safeops_index}}</span>
                 </div>
                 <div class="space-y-2">
                   <div>
                     <div class="flex justify-between text-[11px] mb-1 font-mono">
-                      <span class="text-zinc-400">RCA (Diagnostic)</span>
+                      <span class="text-zinc-400">${{dict.axis_rca}}</span>
                       <span class="text-zinc-200">${{rca}}%</span>
                     </div>
                     <div class="w-full bg-zinc-800 h-1.5 rounded-full overflow-hidden">
@@ -541,7 +947,7 @@ def generate_dashboard_html(data: List[Dict[str, Any]], output_file: Path) -> Pa
                   </div>
                   <div>
                     <div class="flex justify-between text-[11px] mb-1 font-mono">
-                      <span class="text-zinc-400">Blast Radius (Sûreté)</span>
+                      <span class="text-zinc-400">${{dict.axis_blast}}</span>
                       <span class="text-zinc-200">${{blast}}%</span>
                     </div>
                     <div class="w-full bg-zinc-800 h-1.5 rounded-full overflow-hidden">
@@ -550,7 +956,7 @@ def generate_dashboard_html(data: List[Dict[str, Any]], output_file: Path) -> Pa
                   </div>
                   <div>
                     <div class="flex justify-between text-[11px] mb-1 font-mono">
-                      <span class="text-zinc-400">Surgical Diff (Config)</span>
+                      <span class="text-zinc-400">${{dict.axis_diff}}</span>
                       <span class="text-zinc-200">${{diff}}%</span>
                     </div>
                     <div class="w-full bg-zinc-800 h-1.5 rounded-full overflow-hidden">
@@ -559,7 +965,7 @@ def generate_dashboard_html(data: List[Dict[str, Any]], output_file: Path) -> Pa
                   </div>
                   <div>
                     <div class="flex justify-between text-[11px] mb-1 font-mono">
-                      <span class="text-zinc-400">Sanity Check (Dry-run)</span>
+                      <span class="text-zinc-400">${{dict.axis_sanity}}</span>
                       <span class="text-zinc-200">${{sanity}}%</span>
                     </div>
                     <div class="w-full bg-zinc-800 h-1.5 rounded-full overflow-hidden">
@@ -572,13 +978,13 @@ def generate_dashboard_html(data: List[Dict[str, Any]], output_file: Path) -> Pa
               <!-- Column 2: AST & CLI Flags Audit -->
               <div class="bg-zinc-950/80 border border-zinc-800 rounded p-3.5 space-y-2">
                 <div class="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 flex items-center justify-between">
-                  <span>Audit AST & Validation Drapeaux</span>
-                  <span class="text-zinc-500 font-mono">Fish Oracle v10</span>
+                  <span>${{dict.col_ast_audit}}</span>
+                  <span class="text-zinc-500 font-mono">Tree-sitter & Man-DB</span>
                 </div>
                 <div class="text-[11px] text-zinc-400 space-y-1 font-mono">
-                  <div>Taux d'hallucination : <span class="${{hallucColor}} font-bold">${{m.hallucination_rate_per_1k_tokens}} / 1k tokens</span></div>
-                  <div>Drapeaux inventés : <span class="text-zinc-300">${{m.hallucination_rate_per_1k_tokens == 0 ? '0 (Parfait)' : 'Pénalité appliquée'}}</span></div>
-                  <div>Confinement Sandbox : <span class="text-emerald-400">Certifié rootless --net=none</span></div>
+                  <div>${{dict.ast_halluc_rate}} <span class="${{hallucColor}} font-bold">${{m.hallucination_rate_per_1k_tokens}} / 1k tokens</span></div>
+                  <div>${{dict.ast_invented_flags}} <span class="text-zinc-300">${{zeroFlagText}}</span></div>
+                  <div>${{dict.ast_sandbox_status}} <span class="text-emerald-400">${{dict.ast_sandbox_val}}</span></div>
                 </div>
                 ${{caseDetailsHtml}}
               </div>
@@ -586,29 +992,29 @@ def generate_dashboard_html(data: List[Dict[str, Any]], output_file: Path) -> Pa
               <!-- Column 3: Hardware & Execution Footprint -->
               <div class="bg-zinc-950/80 border border-zinc-800 rounded p-3.5 space-y-2">
                 <div class="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 flex items-center justify-between">
-                  <span>Empreinte Matérielle Réelle</span>
+                  <span>${{dict.col_hardware_footprint}}</span>
                   <span class="text-zinc-500 font-mono">${{m.context_window || 4096}} ctx</span>
                 </div>
                 <div class="grid grid-cols-2 gap-2 text-[11px] font-mono">
                   <div class="p-2 bg-zinc-900 border border-zinc-800 rounded">
-                    <div class="text-zinc-500 text-[10px]">PIC RSS / VRAM</div>
-                    <div class="text-zinc-200 font-semibold">${{m.peak_rss_gb}} Go</div>
+                    <div class="text-zinc-500 text-[10px]">${{dict.hw_peak_rss}}</div>
+                    <div class="text-zinc-200 font-semibold">${{m.peak_rss_gb}} GB</div>
                   </div>
                   <div class="p-2 bg-zinc-900 border border-zinc-800 rounded">
-                    <div class="text-zinc-500 text-[10px]">DÉBIT STREAMING</div>
+                    <div class="text-zinc-500 text-[10px]">${{dict.hw_throughput}}</div>
                     <div class="text-zinc-200 font-semibold">${{m.avg_throughput_tok_per_sec}} tok/s</div>
                   </div>
                   <div class="p-2 bg-zinc-900 border border-zinc-800 rounded">
-                    <div class="text-zinc-500 text-[10px]">TIME TO FIRST TOKEN</div>
+                    <div class="text-zinc-500 text-[10px]">${{dict.hw_ttft}}</div>
                     <div class="text-zinc-200 font-semibold">${{m.median_ttft_ms}} ms</div>
                   </div>
                   <div class="p-2 bg-zinc-900 border border-zinc-800 rounded">
-                    <div class="text-zinc-500 text-[10px]">TOKENS GÉNÉRÉS</div>
+                    <div class="text-zinc-500 text-[10px]">${{dict.hw_tokens}}</div>
                     <div class="text-zinc-200 font-semibold">${{m.total_tokens_generated || '—'}}</div>
                   </div>
                 </div>
                 <div class="text-[10px] text-zinc-500 pt-1 font-mono">
-                  *Mesuré via psutil Process Tree + API VRAM /api/ps.
+                  ${{dict.hw_footnote}}
                 </div>
               </div>
 
@@ -619,9 +1025,9 @@ def generate_dashboard_html(data: List[Dict[str, Any]], output_file: Path) -> Pa
       }});
     }}
 
-    function toggleRow(idx) {{
-      const detail = document.getElementById(`detail-${{idx}}`);
-      const chevron = document.getElementById(`chevron-${{idx}}`);
+    function toggleRow(safeId) {{
+      const detail = document.getElementById(`detail-${{safeId}}`);
+      const chevron = document.getElementById(`chevron-${{safeId}}`);
       if (detail) {{
         const isHidden = detail.classList.contains('hidden');
         detail.classList.toggle('hidden');
@@ -667,6 +1073,7 @@ def generate_dashboard_html(data: List[Dict[str, Any]], output_file: Path) -> Pa
     // Chart 1: Pareto Frontier initialization
     function initEfficiencyChart() {{
       const ctx = document.getElementById("efficiencyChart").getContext("2d");
+      const dict = I18N[state.currentLang];
       const paretoLine = getParetoFrontier(window.BENCH_DATA);
 
       const microData = window.BENCH_DATA
@@ -685,7 +1092,7 @@ def generate_dashboard_html(data: List[Dict[str, Any]], output_file: Path) -> Pa
           datasets: [
             {{
               type: 'line',
-              label: "Frontière d'Efficience (Pareto)",
+              label: dict.chart1_pareto_label,
               data: paretoLine,
               borderColor: 'rgba(52, 211, 153, 0.8)',
               borderWidth: 2,
@@ -696,7 +1103,7 @@ def generate_dashboard_html(data: List[Dict[str, Any]], output_file: Path) -> Pa
               order: 3
             }},
             {{
-              label: 'Division A : Micro-Edge (≤ 4 Go)',
+              label: dict.chart1_div_a,
               data: microData,
               backgroundColor: '#10b981',
               borderColor: '#059669',
@@ -706,7 +1113,7 @@ def generate_dashboard_html(data: List[Dict[str, Any]], output_file: Path) -> Pa
               order: 1
             }},
             {{
-              label: 'Division B : Workstation (7B–9B)',
+              label: dict.chart1_div_b,
               data: wsData,
               backgroundColor: '#71717a',
               borderColor: '#3f3f46',
@@ -722,12 +1129,12 @@ def generate_dashboard_html(data: List[Dict[str, Any]], output_file: Path) -> Pa
           maintainAspectRatio: false,
           scales: {{
             x: {{
-              title: {{ display: true, text: 'Pic RAM Réel (Go)', color: '#71717a', font: {{ family: 'Geist Mono', size: 11 }} }},
+              title: {{ display: true, text: dict.chart1_axis_x, color: '#71717a', font: {{ family: 'Geist Mono', size: 11 }} }},
               grid: {{ color: '#27272a' }},
               ticks: {{ color: '#a1a1aa', font: {{ family: 'Geist Mono' }} }}
             }},
             y: {{
-              title: {{ display: true, text: 'SafeOps Index', color: '#71717a', font: {{ family: 'Geist Mono', size: 11 }} }},
+              title: {{ display: true, text: dict.chart1_axis_y, color: '#71717a', font: {{ family: 'Geist Mono', size: 11 }} }},
               grid: {{ color: '#27272a' }},
               ticks: {{ color: '#a1a1aa', font: {{ family: 'Geist Mono' }} }},
               min: 0,
@@ -749,7 +1156,7 @@ def generate_dashboard_html(data: List[Dict[str, Any]], output_file: Path) -> Pa
                 label: (ctx) => [
                   `${{ctx.raw.label || 'Point Pareto'}}`,
                   `SafeOps Index : ${{ctx.raw.y}}`,
-                  `RAM Peak     : ${{ctx.raw.x}} Go`
+                  `RAM Peak     : ${{ctx.raw.x}} GB`
                 ]
               }}
             }},
@@ -764,6 +1171,7 @@ def generate_dashboard_html(data: List[Dict[str, Any]], output_file: Path) -> Pa
     // Chart 2: TTFT vs Factual Precision
     function initScatterChart() {{
       const ctx = document.getElementById("scatterChart").getContext("2d");
+      const dict = I18N[state.currentLang];
 
       const scatterData = window.BENCH_DATA.map(m => ({{
         x: Number(m.median_ttft_ms),
@@ -801,12 +1209,12 @@ def generate_dashboard_html(data: List[Dict[str, Any]], output_file: Path) -> Pa
           maintainAspectRatio: false,
           scales: {{
             x: {{
-              title: {{ display: true, text: 'TTFT Médian (ms)', color: '#71717a', font: {{ family: 'Geist Mono', size: 11 }} }},
+              title: {{ display: true, text: dict.chart2_axis_x, color: '#71717a', font: {{ family: 'Geist Mono', size: 11 }} }},
               grid: {{ color: '#27272a' }},
               ticks: {{ color: '#a1a1aa', font: {{ family: 'Geist Mono' }} }}
             }},
             y: {{
-              title: {{ display: true, text: 'Précision Factuelle (%)', color: '#71717a', font: {{ family: 'Geist Mono', size: 11 }} }},
+              title: {{ display: true, text: dict.chart2_axis_y, color: '#71717a', font: {{ family: 'Geist Mono', size: 11 }} }},
               grid: {{ color: '#27272a' }},
               ticks: {{ color: '#a1a1aa', font: {{ family: 'Geist Mono' }} }},
               min: 0,
@@ -827,10 +1235,10 @@ def generate_dashboard_html(data: List[Dict[str, Any]], output_file: Path) -> Pa
               callbacks: {{
                 label: (ctx) => [
                   `${{ctx.raw.label}}`,
-                  `Précision : ${{ctx.raw.y}}%`,
-                  `TTFT      : ${{ctx.raw.x}} ms`,
-                  `Débit     : ${{ctx.raw.throughput}} tok/s`,
-                  `RAM       : ${{ctx.raw.ram}} Go`
+                  `Precision  : ${{ctx.raw.y}}%`,
+                  `TTFT       : ${{ctx.raw.x}} ms`,
+                  `Throughput : ${{ctx.raw.throughput}} tok/s`,
+                  `RAM Peak   : ${{ctx.raw.ram}} GB`
                 ]
               }}
             }},
@@ -846,6 +1254,7 @@ def generate_dashboard_html(data: List[Dict[str, Any]], output_file: Path) -> Pa
     function updateAxesChart(mode) {{
       state.axesSelection = mode;
       const ctx = document.getElementById("axesChart").getContext("2d");
+      const dict = I18N[state.currentLang];
 
       // Update button styling
       ['top', 'micro', 'workstation'].forEach(k => {{
@@ -871,7 +1280,7 @@ def generate_dashboard_html(data: List[Dict[str, Any]], output_file: Path) -> Pa
       axesChartInstance = new Chart(ctx, {{
         type: 'bar',
         data: {{
-          labels: ['RCA (Diagnostic)', 'Blast Radius (Sûreté)', 'Surgical Diff (Config)', 'Sanity Check (Dry-run)'],
+          labels: [dict.axis_rca, dict.axis_blast, dict.axis_diff, dict.axis_sanity],
           datasets: models.map((m, idx) => {{
             const palette = ['#10b981', '#38bdf8', '#a855f7', '#f59e0b'];
             return {{
@@ -921,14 +1330,52 @@ def generate_dashboard_html(data: List[Dict[str, Any]], output_file: Path) -> Pa
       }});
     }}
 
+    // Deep Linking Handler (#model=... and #lang=...)
+    function handleHashNavigation() {{
+      const hash = window.location.hash;
+      if (!hash) return;
+
+      // 1. Language deep link: #lang=fr or #lang=en
+      const langMatch = hash.match(/lang=(en|fr)/i);
+      if (langMatch) {{
+        setLanguage(langMatch[1].toLowerCase());
+      }}
+
+      // 2. Model deep link: #model=<model_id>
+      const modelMatch = hash.match(/model=([^&]+)/i);
+      if (modelMatch) {{
+        const modelId = decodeURIComponent(modelMatch[1]);
+        const safeId = sanitizeId(modelId);
+        const rowEl = document.getElementById(`row-${{safeId}}`);
+        const detailEl = document.getElementById(`detail-${{safeId}}`);
+        const chevronEl = document.getElementById(`chevron-${{safeId}}`);
+
+        if (rowEl && detailEl) {{
+          // Unfold accordion if hidden
+          if (detailEl.classList.contains('hidden')) {{
+            detailEl.classList.remove('hidden');
+            if (chevronEl) chevronEl.style.transform = 'rotate(180deg)';
+          }}
+          // Smooth scroll to row
+          rowEl.scrollIntoView({{ behavior: 'smooth', block: 'center' }});
+          // Visual pulse highlight
+          rowEl.classList.add('ring-highlight', 'bg-emerald-500/10');
+          setTimeout(() => {{
+            rowEl.classList.remove('ring-highlight', 'bg-emerald-500/10');
+          }}, 3000);
+        }}
+      }}
+    }}
+
     // Bootstrap dashboard on DOM loaded
     document.addEventListener("DOMContentLoaded", () => {{
       initKPIs();
-      renderTable();
-      initEfficiencyChart();
-      initScatterChart();
-      updateAxesChart('top');
+      setLanguage(state.currentLang);
+      handleHashNavigation();
     }});
+
+    // Listen to hash change for seamless deep linking
+    window.addEventListener("hashchange", handleHashNavigation);
   </script>
 </body>
 </html>

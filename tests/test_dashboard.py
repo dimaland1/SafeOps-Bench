@@ -59,6 +59,20 @@ def test_generate_dashboard_html_zero_cors(tmp_path: Path, mock_telemetry_datase
     assert "scatterChart" in content
     assert "axesChart" in content
 
+    # Check Open Graph & Twitter meta tags
+    assert 'meta property="og:image" content="https://safeops.jalal.tech/assets/og-preview.png"' in content
+    assert 'meta name="twitter:card" content="summary_large_image"' in content
+    assert 'meta name="twitter:image" content="https://safeops.jalal.tech/assets/og-preview.png"' in content
+
+    # Check Personal Branding & GitHub repo
+    assert 'href="https://jalal.tech"' in content
+    assert 'href="https://github.com/dimaland1/SafeOps-Bench"' in content
+
+    # Check Deep Linking, Open Data Export, and Hardware Provenance
+    assert "handleHashNavigation" in content
+    assert "exportTelemetryJSON" in content
+    assert "Hardware Provenance:" in content
+
 
 def test_generate_markdown_summary(tmp_path: Path, mock_telemetry_dataset):
     out_md = tmp_path / "RESULTS.md"
