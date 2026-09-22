@@ -81,8 +81,7 @@ fi
 
 # 4. Installation de l'environnement Python
 echo "==> [4/6] Installation du package safeops-bench en mode éditable..."
-python3 -m pip install --upgrade pip setuptools wheel
-python3 -m pip install -e .
+python3 -m pip install -e . --break-system-packages
 
 # Vérification / régénération de la base de l'Oracle si nécessaire
 if [ ! -f "data/completions.sqlite" ]; then
